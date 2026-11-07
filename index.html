@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  IT ASSET MANAGEMENT DASHBOARD  —  HOST THIS FILE ON NETLIFY
+  ============================================================================
+  TO DEPLOY:
+    1. Open this file in Notepad.
+    2. Find the line below that says:  const BACKEND_URL = "";
+    3. Paste your Google Apps Script Web App URL between the quotes.
+    4. Save the file.
+    5. Drag this file to https://app.netlify.com/drop
+
+  Leave BACKEND_URL = "" empty to run in DEMO mode (sample data).
+
+  Full instructions: see SETUP_GUIDE.md
+  ============================================================================
+-->
+<html lang="en">
+<head>
+  <script>
+    // ====================================================================
+    // CONFIGURATION  -  EDIT THIS LINE  -  EDIT THIS LINE  -  EDIT THIS LINE
+    // ====================================================================
+    // Paste your Google Apps Script Web App URL between the quotes below.
+    // Leave it empty ("") to run in DEMO mode (sample data in your browser).
+    // After deploying Apps Script (see SETUP_GUIDE.md), paste the URL here.
+    //
+    // Example:
+    //   const BACKEND_URL = "https://script.google.com/macros/s/AKfycby.../exec";
+    //
+    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbwgeKlzatbUKdGGGRZ7AX8U-UpWd5dkBfkG8U47U9vrNt2j7IJ-UVtM8uQnSL4Pz65Gxg/exec";
+	
+    // ====================================================================
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Huff&Puff - IT Asset Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+/* ============================================================
+   IT ASSET DASHBOARD - STYLES
+   Blue/White Professional Admin Theme
+   Responsive for Windows laptops and Android phones
+   ============================================================ */
+
+:root {
+  --blue-900: #1e3a8a;
+  --blue-700: #1d4ed8;
+  --blue-600: #2563eb;
+  --blue-500: #3b82f6;
+  --blue-100: #dbeafe;
+  --blue-50:  #eff6ff;
+  --white:    #ffffff;
+  --bg:       #f1f5f9;
+  --gray-900: #0f172a;
+  --gray-700: #334155;
+  --gray-500: #64748b;
+  --gray-300: #cbd5e1;
+  --gray-200: #e2e8f0;
+  --gray-100: #f1f5f9;
+  --green:    #16a34a;
+  --green-bg: #dcfce7;
+  --red:      #dc2626;
+  --red-bg:   #fee2e2;
+  --orange:   #ea580c;
+  --orange-bg:#ffedd5;
+  --yellow:   #ca8a04;
+  --yellow-bg:#fef9c3;
+  --shadow:   0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 12px rgba(0,0,0,.12);
+  --radius:   10px;
+  --sidebar-w: 250px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--gray-900);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.hidden { display: none !important; }
+
+/* ---------- LOGIN SCREEN ---------- */
+.login-screen {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-600) 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.login-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 36px 32px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+}
+.login-logo { text-align: center; margin-bottom: 24px; }
+.login-logo h1 { color: var(--blue-900); font-size: 22px; margin-top: 8px; }
+.login-logo p { color: var(--gray-500); font-size: 13px; margin-top: 2px; }
+.logo-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px;
+  background: var(--blue-600); color: var(--white);
+  border-radius: 12px; font-weight: 700; font-size: 18px;
+  letter-spacing: 1px;
+}
+.login-hint {
+  margin-top: 20px; padding: 12px 16px;
+  background: var(--blue-50); border-radius: 8px;
+  font-size: 12px; color: var(--gray-700);
+  text-align: center;
+}
+.login-hint code {
+  background: var(--white); padding: 1px 6px;
+  border-radius: 4px; font-weight: 600; color: var(--blue-700);
+}
+.login-hint em { display: block; margin-top: 4px; color: var(--orange); }
+
+/* ---------- FORM ELEMENTS ---------- */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; margin-bottom: 5px;
+  font-size: 13px; font-weight: 600; color: var(--gray-700);
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--gray-300); border-radius: 7px;
+  font-size: 14px; font-family: inherit;
+  background: var(--white); color: var(--gray-900);
+  transition: border-color .15s, box-shadow .15s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-msg { font-size: 13px; color: var(--red); margin-top: 8px; min-height: 18px; }
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  padding: 9px 16px; border: none; border-radius: 7px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary   { background: var(--blue-600); color: var(--white); }
+.btn-primary:hover { background: var(--blue-700); }
+.btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+.btn-secondary:hover { background: var(--gray-300); }
+.btn-danger    { background: var(--red); color: var(--white); }
+.btn-info      { background: var(--blue-500); color: var(--white); }
+.btn-info:hover { background: var(--blue-600); }
+.btn-warning   { background: var(--orange); color: var(--white); }
+.btn-warning:hover { background: #c2410c; }
+.btn-success   { background: var(--green); color: var(--white); }
+.btn-block { width: 100%; justify-content: center; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* ---------- APP LAYOUT ---------- */
+.app-main { display: flex; min-height: 100vh; }
+
+/* ---------- SIDEBAR ---------- */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--blue-900);
+  color: var(--white);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; bottom: 0; left: 0;
+  z-index: 100;
+  transition: transform .25s ease;
+}
+.sidebar.collapsed { transform: translateX(-100%); }
+.sidebar-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.sidebar-header .logo-icon {
+  width: 36px; height: 36px;
+  background: var(--white); color: var(--blue-900);
+  border-radius: 8px; font-size: 14px;
+}
+.brand { flex: 1; min-width: 0; }
+.brand strong { display: block; font-size: 14px; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand small { display: block; font-size: 11px; color: rgba(255,255,255,.6); }
+.sidebar-toggle {
+  background: transparent; border: none; color: rgba(255,255,255,.7);
+  font-size: 22px; cursor: pointer; padding: 0 4px;
+}
+.sidebar-nav {
+  flex: 1; overflow-y: auto;
+  padding: 12px 8px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  margin-bottom: 2px;
+  transition: all .15s;
+}
+.nav-link:hover { background: rgba(255,255,255,.08); color: var(--white); }
+.nav-link.active { background: var(--blue-600); color: var(--white); }
+.nav-icon { width: 18px; text-align: center; font-size: 13px; }
+.sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,.12); }
+.btn-logout {
+  width: 100%; padding: 9px;
+  background: transparent; color: rgba(255,255,255,.8);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 7px; cursor: pointer;
+  font-size: 13px; font-family: inherit;
+}
+.btn-logout:hover { background: var(--red); color: var(--white); border-color: var(--red); }
+
+/* ---------- MAIN CONTENT ---------- */
+.main-content {
+  flex: 1; margin-left: var(--sidebar-w);
+  display: flex; flex-direction: column;
+  min-width: 0;
+  transition: margin-left .25s ease;
+}
+.sidebar.collapsed + .main-content { margin-left: 0; }
+
+.topbar {
+  background: var(--white);
+  height: 60px;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: var(--shadow);
+}
+.topbar h2 { font-size: 18px; color: var(--gray-900); font-weight: 600; }
+.icon-btn {
+  background: transparent; border: none; font-size: 20px;
+  cursor: pointer; color: var(--gray-700);
+  padding: 6px 8px; border-radius: 6px;
+}
+.icon-btn:hover { background: var(--gray-100); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.user-chip {
+  background: var(--blue-50); color: var(--blue-700);
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+
+.page-content { padding: 20px; flex: 1; }
+
+/* ---------- PAGES ---------- */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ---------- STAT GRID ---------- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--blue-600);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-card.green   { border-left-color: var(--green); }
+.stat-card.red     { border-left-color: var(--red); }
+.stat-card.orange  { border-left-color: var(--orange); }
+.stat-card.yellow  { border-left-color: var(--yellow); }
+.stat-card.purple  { border-left-color: #7c3aed; }
+.stat-card .stat-label { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+.stat-card .stat-value { font-size: 26px; font-weight: 700; color: var(--gray-900); }
+
+/* ---------- CARDS ---------- */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+}
+.card h3 { font-size: 15px; color: var(--gray-900); margin-bottom: 14px; font-weight: 600; }
+.chart-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;
+}
+.chart-card { display: flex; flex-direction: column; }
+/* Fixed-height canvas wrapper prevents Chart.js from growing the card
+   indefinitely and stops the page from jumping when scrolling. */
+.chart-container {
+  position: relative;
+  height: 280px;
+  width: 100%;
+}
+.chart-container canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ---------- TOOLBAR ---------- */
+.toolbar {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 14px; align-items: center;
+}
+.search-input, .filter-select {
+  padding: 8px 12px; border: 1px solid var(--gray-300);
+  border-radius: 7px; font-size: 13px;
+  background: var(--white); font-family: inherit;
+}
+.search-input { flex: 1; min-width: 200px; }
+.search-input:focus, .filter-select:focus {
+  outline: none; border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+/* ---------- TABLES ---------- */
+.table-card { padding: 0; overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+.data-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table thead th {
+  background: var(--blue-50);
+  color: var(--blue-900);
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 2px solid var(--blue-100);
+  white-space: nowrap;
+  position: sticky; top: 0;
+}
+.data-table tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-700);
+  white-space: nowrap;
+}
+.data-table tbody tr:hover { background: var(--blue-50); }
+.data-table tbody tr:nth-child(even) { background: var(--gray-100); }
+.data-table tbody tr:nth-child(even):hover { background: var(--blue-50); }
+
+/* ---------- STATUS BADGES ---------- */
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge-available { background: var(--green-bg); color: var(--green); }
+.badge-assigned  { background: var(--blue-100); color: var(--blue-700); }
+.badge-repair    { background: var(--orange-bg); color: var(--orange); }
+.badge-damaged   { background: var(--red-bg); color: var(--red); }
+.badge-active    { background: var(--green-bg); color: var(--green); }
+.badge-returned  { background: var(--gray-200); color: var(--gray-700); }
+.badge-pending   { background: var(--yellow-bg); color: var(--yellow); }
+.badge-resolved  { background: var(--green-bg); color: var(--green); }
+.badge-closed    { background: var(--gray-200); color: var(--gray-700); }
+.badge-low       { background: var(--red-bg); color: var(--red); }
+
+/* ---------- PAGINATION ---------- */
+.pagination { padding: 12px; display: flex; gap: 4px; justify-content: flex-end; align-items: center; }
+.pagination button {
+  padding: 5px 10px; background: var(--white);
+  border: 1px solid var(--gray-300); border-radius: 5px;
+  cursor: pointer; font-size: 12px;
+}
+.pagination button.active { background: var(--blue-600); color: var(--white); border-color: var(--blue-600); }
+.pagination button:disabled { opacity: .5; cursor: not-allowed; }
+.pagination .page-info { font-size: 12px; color: var(--gray-500); margin-right: 10px; }
+
+/* ---------- MODAL ---------- */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 16px;
+}
+.modal {
+  background: var(--white);
+  border-radius: 12px;
+  width: 100%; max-width: 600px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn .2s ease;
+}
+.modal-sm { max-width: 400px; }
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--gray-200);
+}
+.modal-header h3 { font-size: 16px; color: var(--gray-900); font-weight: 600; }
+.modal-close {
+  background: transparent; border: none; font-size: 24px;
+  color: var(--gray-500); cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--red); }
+.modal-body { padding: 20px; }
+
+/* ---------- TOAST ---------- */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-900); color: var(--white);
+  padding: 12px 22px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  animation: toastIn .25s ease;
+}
+.toast.success { background: var(--green); }
+.toast.error   { background: var(--red); }
+.toast.warning { background: var(--orange); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ---------- REPORT GRID ---------- */
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.report-card { display: flex; flex-direction: column; gap: 8px; }
+.report-card p { color: var(--gray-500); font-size: 13px; flex: 1; }
+.report-card button { margin-top: 8px; align-self: flex-start; }
+
+/* ---------- LOW STOCK LIST ---------- */
+.low-stock-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px dashed var(--gray-200);
+}
+.low-stock-item:last-child { border-bottom: none; }
+.low-stock-item .name { font-weight: 600; color: var(--gray-900); }
+.low-stock-item .info { font-size: 12px; color: var(--gray-500); }
+
+/* ---------- RESPONSIVE (mobile / tablet) ---------- */
+@media (max-width: 900px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .topbar h2 { font-size: 16px; }
+  .page-content { padding: 14px; }
+}
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .toolbar { gap: 8px; }
+  .search-input, .filter-select { width: 100%; flex: 1 1 100%; }
+  .btn { flex: 1; }
+  .modal { max-width: 100%; }
+  .user-chip { display: none; }
+}
+</style>
+
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <span class="logo-icon">IT</span>
+        <h1>Huff&Puff</h1>
+        <p>IT Asset Management System</p>
+      </div>
+      <form id="loginForm" onsubmit="return doLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="loginUser" required autocomplete="off" placeholder="admin">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPass" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        <p id="loginMsg" class="form-msg"></p>
+      </form>
+      <div class="login-hint">
+        <strong>Default credentials</strong><br>
+        Username: <code>admin</code><br>
+        Password: <code>admin123</code><br>
+        <em>Please change the password after first login.</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="appMain" class="app-main hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-icon">IT</span>
+        <div class="brand">
+          <strong>Huff&Puff</strong>
+          <small>Asset Manager</small>
+        </div>
+        <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="collapse"></button>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav">
+        <a href="#" class="nav-link active" data-page="dashboard" onclick="showPage('dashboard', this)">
+          <span class="nav-icon">&#9632;</span> Dashboard
+        </a>
+        <a href="#" class="nav-link" data-page="assets" onclick="showPage('assets', this)">
+          <span class="nav-icon">&#9635;</span> Asset Register
+        </a>
+        <a href="#" class="nav-link" data-page="branches" onclick="showPage('branches', this)">
+          <span class="nav-icon">&#9674;</span> Branches
+        </a>
+        <a href="#" class="nav-link" data-page="employees" onclick="showPage('employees', this)">
+          <span class="nav-icon">&#9774;</span> Employees
+        </a>
+        <a href="#" class="nav-link" data-page="assignments" onclick="showPage('assignments', this)">
+          <span class="nav-icon">&#8627;</span> Assignments
+        </a>
+        <a href="#" class="nav-link" data-page="transfers" onclick="showPage('transfers', this)">
+          <span class="nav-icon">&#8646;</span> Transfers
+        </a>
+        <a href="#" class="nav-link" data-page="stock" onclick="showPage('stock', this)">
+          <span class="nav-icon">&#9776;</span> IT Stock
+        </a>
+        <a href="#" class="nav-link" data-page="maintenance" onclick="showPage('maintenance', this)">
+          <span class="nav-icon">&#9881;</span> Maintenance
+        </a>
+        <a href="#" class="nav-link" data-page="reports" onclick="showPage('reports', this)">
+          <span class="nav-icon">&#9636;</span> Reports
+        </a>
+        <a href="#" class="nav-link" data-page="users" onclick="showPage('users', this)" id="navUsers">
+          <span class="nav-icon">&#9679;</span> Users
+        </a>
+        <a href="#" class="nav-link" data-page="activity" onclick="showPage('activity', this)" id="navActivity">
+          <span class="nav-icon">&#9201;</span> Activity Log
+        </a>
+        <a href="#" class="nav-link" data-page="settings" onclick="showPage('settings', this)">
+          <span class="nav-icon">&#9881;</span> Settings
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">&#10162; Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="mainContent">
+      <header class="topbar">
+        <button class="icon-btn" onclick="toggleSidebar()" aria-label="menu">&#9776;</button>
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="topbar-right">
+          <span id="currentUserLabel" class="user-chip"></span>
+        </div>
+      </header>
+
+      <section class="page-content">
+
+        <!-- DASHBOARD PAGE -->
+        <div class="page active" id="page-dashboard">
+          <div class="stat-grid" id="statGrid"></div>
+          <div class="chart-grid">
+            <div class="card chart-card">
+              <h3>Assets by Branch</h3>
+              <div class="chart-container">
+                <canvas id="branchChart"></canvas>
+              </div>
+            </div>
+            <div class="card chart-card">
+              <h3>Assets by Category</h3>
+              <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Low Stock Alerts</h3>
+            <div id="lowStockList"></div>
+          </div>
+        </div>
+
+        <!-- ASSETS PAGE -->
+        <div class="page" id="page-assets">
+          <div class="toolbar">
+            <input type="text" id="assetSearch" class="search-input"
+                   placeholder="Search by ID, name, serial, employee..." oninput="renderAssets()">
+            <select id="assetFilterCategory" class="filter-select" onchange="renderAssets()"></select>
+            <select id="assetFilterBranch" class="filter-select" onchange="renderAssets()"></select>
+            <select id="assetFilterStatus" class="filter-select" onchange="renderAssets()">
+              <option value="">All Status</option>
+              <option>Available</option><option>Assigned</option>
+              <option>Under Repair</option><option>Damaged</option>
+            </select>
+            <button class="btn btn-primary" onclick="openAssetForm()">+ Add Asset</button>
+            <button class="btn btn-secondary" onclick="exportCSV('assets')">Export CSV</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="assetTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+            <div id="assetPagination" class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- BRANCHES PAGE -->
+        <div class="page" id="page-branches">
+          <div class="toolbar">
+            <input type="text" id="branchSearch" class="search-input"
+                   placeholder="Search branches..." oninput="renderBranches()">
+            <button class="btn btn-primary" onclick="openBranchForm()">+ Add Branch</button>
+            <button class="btn btn-secondary" onclick="exportCSV('branches')">Export CSV</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="branchTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMPLOYEES PAGE -->
+        <div class="page" id="page-employees">
+          <div class="toolbar">
+            <input type="text" id="empSearch" class="search-input"
+                   placeholder="Search employees..." oninput="renderEmployees()">
+            <select id="empFilterBranch" class="filter-select" onchange="renderEmployees()"></select>
+            <button class="btn btn-primary" onclick="openEmployeeForm()">+ Add Employee</button>
+            <button class="btn btn-secondary" onclick="exportCSV('employees')">Export CSV</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="employeeTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ASSIGNMENTS PAGE -->
+        <div class="page" id="page-assignments">
+          <div class="toolbar">
+            <button class="btn btn-primary" onclick="openAssignForm()">+ Assign Asset</button>
+            <button class="btn btn-secondary" onclick="exportCSV('assignments')">Export CSV</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="assignmentTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSFERS PAGE -->
+        <div class="page" id="page-transfers">
+          <div class="toolbar">
+            <button class="btn btn-primary" onclick="openTransferForm()">+ Transfer Asset</button>
+            <button class="btn btn-secondary" onclick="exportCSV('transfers')">Export CSV</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="transferTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- STOCK PAGE -->
+        <div class="page" id="page-stock">
+          <div class="toolbar">
+            <input type="text" id="stockSearch" class="search-input"
+                   placeholder="Search stock items..." oninput="renderStock()">
+            <button class="btn btn-primary" onclick="openStockForm()">+ Add Item</button>
+            <button class="btn btn-info" onclick="openMovementForm('Received')">Receive Stock</button>
+            <button class="btn btn-warning" onclick="openMovementForm('Issued')">Issue Stock</button>
+            <button class="btn btn-secondary" onclick="exportCSV('stock')">Export CSV</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="stockTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Stock Movements</h3>
+            <div class="table-scroll">
+              <table class="data-table" id="movementTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAINTENANCE PAGE -->
+        <div class="page" id="page-maintenance">
+          <div class="toolbar">
+            <button class="btn btn-primary" onclick="openMaintenanceForm()">+ New Repair Request</button>
+            <button class="btn btn-secondary" onclick="exportCSV('maintenance')">Export CSV</button>
+          </div>
+          <div class="card">
+            <h3>Warranty Expiry Alerts (next 30 days)</h3>
+            <div class="table-scroll">
+              <table class="data-table" id="warrantyTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card table-card">
+            <h3>Repair History</h3>
+            <div class="table-scroll">
+              <table class="data-table" id="maintenanceTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS PAGE -->
+        <div class="page" id="page-reports">
+          <div class="report-grid">
+            <div class="card report-card">
+              <h3>Complete Asset Register</h3>
+              <p>All assets with full details.</p>
+              <button class="btn btn-primary" onclick="exportCSV('assets')">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Branch-wise Assets</h3>
+              <p>Assets grouped by branch.</p>
+              <button class="btn btn-primary" onclick="exportBranchAssets()">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Employee-wise Assets</h3>
+              <p>Assets grouped by employee.</p>
+              <button class="btn btn-primary" onclick="exportEmployeeAssets()">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Stock &amp; Issued Items</h3>
+              <p>Stock movements and balances.</p>
+              <button class="btn btn-primary" onclick="exportCSV('stockMovements')">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Repairs &amp; Warranty</h3>
+              <p>Maintenance and warranty alerts.</p>
+              <button class="btn btn-primary" onclick="exportCSV('maintenance')">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Asset Transfers</h3>
+              <p>All transfer history.</p>
+              <button class="btn btn-primary" onclick="exportCSV('transfers')">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Asset Handover Report</h3>
+              <p>Active assignments to employees.</p>
+              <button class="btn btn-primary" onclick="exportCSV('assignments')">Export CSV</button>
+            </div>
+            <div class="card report-card">
+              <h3>Branch Master List</h3>
+              <p>All branch details.</p>
+              <button class="btn btn-primary" onclick="exportCSV('branches')">Export CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- USERS PAGE -->
+        <div class="page" id="page-users">
+          <div class="toolbar">
+            <button class="btn btn-primary" onclick="openUserForm()">+ Add User</button>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="userTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY LOG PAGE -->
+        <div class="page" id="page-activity">
+          <div class="card table-card">
+            <div class="table-scroll">
+              <table class="data-table" id="activityTable">
+                <thead></thead><tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div class="page" id="page-settings">
+          <div class="card">
+            <h3>Categories</h3>
+            <p>Comma-separated list of asset categories.</p>
+            <textarea id="categoriesInput" rows="3" style="width:100%"></textarea>
+            <button class="btn btn-primary" onclick="saveCategories()">Save Categories</button>
+          </div>
+          <div class="card">
+            <h3>Database Information</h3>
+            <p id="dbInfo">Loading...</p>
+            <button class="btn btn-secondary" onclick="loadDbInfo()">Refresh</button>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Form</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- CONFIRM DIALOG -->
+  <div id="confirmOverlay" class="modal-overlay hidden">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="confirmTitle">Confirm</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">Are you sure?</p>
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="closeConfirm(false)">Cancel</button>
+          <button class="btn btn-danger" id="confirmYesBtn" onclick="closeConfirm(true)">Yes, Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+/* ============================================================
+   IT ASSET DASHBOARD - JAVASCRIPT
+   Works in THREE modes (auto-detected):
+   1. EMBEDDED - via google.script.run (when served from Apps Script)
+   2. HOSTED   - via fetch() to BACKEND_URL (when hosted externally)
+   3. DEMO     - using localStorage + sample data (when opened locally
+                 with BACKEND_URL empty)
+   Switching is automatic. You don't need to do anything.
+   ============================================================ */
+
+/* ---------- GLOBAL STATE ---------- */
+const State = {
+  user: null,
+  token: null,
+  currentPage: 'dashboard',
+  data: {
+    assets: [], branches: [], employees: [],
+    stock: [], stockMovements: [], maintenance: [],
+    transfers: [], assignments: [], users: [], activityLog: [],
+    categories: [], settings: {}
+  },
+  charts: { branch: null, category: null },
+  pagination: { assets: 1, pageSize: 25 }
+};
+
+/* Detect mode - BACKEND_URL is defined in Index.html <head> */
+const IS_EMBEDDED = (typeof google !== 'undefined' && google.script && google.script.run);
+const IS_HOSTED = !IS_EMBEDDED && (typeof BACKEND_URL !== 'undefined') && BACKEND_URL && BACKEND_URL.length > 5;
+const IS_DEMO = !IS_EMBEDDED && !IS_HOSTED;
+
+/* ---------- API LAYER (handles all 3 modes) ---------- */
+const API = {
+  async call(method, ...args) {
+    if (IS_EMBEDDED) {
+      // Embedded mode - use google.script.run
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)[method](...args);
+      });
+    } else if (IS_HOSTED) {
+      // Hosted mode - use fetch to call Apps Script JSON API
+      const token = State.token || localStorage.getItem('it_asset_token') || '';
+      let res;
+      try {
+        res = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: method, args: args, token: token })
+        });
+      } catch (e) {
+        throw new Error('Cannot reach server. Check BACKEND_URL and your network. (' + e.message + ')');
+      }
+      if (!res.ok) throw new Error('HTTP error ' + res.status);
+      const data = await res.json();
+      if (data && data.success === false && data.message === 'Unauthorized. Please log in again.') {
+        // Token expired - force logout
+        State.user = null; State.token = null;
+        localStorage.removeItem('it_asset_user');
+        localStorage.removeItem('it_asset_token');
+        $('appMain').classList.add('hidden');
+        $('loginScreen').classList.remove('hidden');
+        showToast('Session expired. Please sign in again.', 'warning');
+      }
+      return data;
+    } else {
+      // Demo mode
+      return Demo[method] ? Demo[method](...args) : { success: false, message: 'Not available in demo' };
+    }
+  }
+};
+
+/* ---------- DEMO MODE (localStorage + sample data) ---------- */
+const Demo = {
+  _key: 'it_asset_demo_v1',
+  _load() {
+    let raw = localStorage.getItem(this._key);
+    if (!raw) {
+      raw = JSON.stringify(this._seed());
+      localStorage.setItem(this._key, raw);
+    }
+    return JSON.parse(raw);
+  },
+  _save(db) { localStorage.setItem(this._key, JSON.stringify(db)); },
+  _seed() {
+    const today = new Date();
+    const in30 = (d) => new Date(today.getTime() + d*86400000).toISOString().slice(0,10);
+    const db = {
+      assets: [
+        {AssetID:'AST-0001',AssetName:'Dell Latitude 5520',Category:'Laptop',Brand:'Dell',Model:'Latitude 5520',SerialNumber:'DL5520A001',PurchaseDate:'2023-03-15',PurchasePrice:4500,WarrantyExpiry:in30(20),BranchID:'BR-001',BranchName:'Head Office - Dubai',EmployeeID:'EMP-0001',EmployeeName:'Ahmed Al Mansoori',Status:'Assigned',Remarks:'Primary work laptop',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()},
+        {AssetID:'AST-0002',AssetName:'HP ProBook 450',Category:'Laptop',Brand:'HP',Model:'ProBook 450 G9',SerialNumber:'HP450B002',PurchaseDate:'2023-06-20',PurchasePrice:3800,WarrantyExpiry:in30(-10),BranchID:'BR-002',BranchName:'Downtown Branch',EmployeeID:'EMP-0002',EmployeeName:'Sara Khan',Status:'Assigned',Remarks:'',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()},
+        {AssetID:'AST-0003',AssetName:'Cisco Catalyst 2960',Category:'Switch',Brand:'Cisco',Model:'Catalyst 2960-24TT',SerialNumber:'CISCO2960003',PurchaseDate:'2022-01-10',PurchasePrice:5200,WarrantyExpiry:in30(-200),BranchID:'BR-001',BranchName:'Head Office - Dubai',EmployeeID:'',EmployeeName:'',Status:'Available',Remarks:'Backup switch',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()},
+        {AssetID:'AST-0004',AssetName:'Epson Thermal Printer',Category:'Printer',Brand:'Epson',Model:'TM-T82',SerialNumber:'EPSN004',PurchaseDate:'2023-08-01',PurchasePrice:850,WarrantyExpiry:in30(120),BranchID:'BR-003',BranchName:'Marina Branch',EmployeeID:'',EmployeeName:'',Status:'Under Repair',Remarks:'Paper feed issue',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()},
+        {AssetID:'AST-0005',AssetName:'Hikvision CCTV Cam',Category:'CCTV Camera',Brand:'Hikvision',Model:'DS-2CE16D0T',SerialNumber:'HKV005',PurchaseDate:'2023-09-12',PurchasePrice:280,WarrantyExpiry:in30(5),BranchID:'BR-004',BranchName:'JBR Branch',EmployeeID:'',EmployeeName:'',Status:'Available',Remarks:'Outdoor dome cam',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()},
+        {AssetID:'AST-0006',AssetName:'Star Micronics POS',Category:'POS Machine',Brand:'Star',Model:'TSP143',SerialNumber:'STR006',PurchaseDate:'2023-11-05',PurchasePrice:1200,WarrantyExpiry:in30(200),BranchID:'BR-005',BranchName:'Abu Dhabi Mall',EmployeeID:'EMP-0003',EmployeeName:'Ramesh Patel',Status:'Assigned',Remarks:'Cash desk 2',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()},
+        {AssetID:'AST-0007',AssetName:'APC Smart UPS 1500',Category:'UPS',Brand:'APC',Model:'Smart-UPS 1500VA',SerialNumber:'APC007',PurchaseDate:'2022-05-22',PurchasePrice:1100,WarrantyExpiry:in30(-30),BranchID:'BR-001',BranchName:'Head Office - Dubai',EmployeeID:'',EmployeeName:'',Status:'Damaged',Remarks:'Battery failed',CreatedDate:today.toISOString(),UpdatedDate:today.toISOString()}
+      ],
+      branches: [
+        {BranchID:'BR-001',BranchName:'Head Office - Dubai',Address:'Sheikh Zayed Road',City:'Dubai',Phone:'+971-4-000-0001',Manager:'General Manager',CreatedDate:today.toISOString()},
+        {BranchID:'BR-002',BranchName:'Downtown Branch',Address:'Burj Khalifa St',City:'Dubai',Phone:'+971-4-000-0002',Manager:'Branch Manager',CreatedDate:today.toISOString()},
+        {BranchID:'BR-003',BranchName:'Marina Branch',Address:'Dubai Marina',City:'Dubai',Phone:'+971-4-000-0003',Manager:'Branch Manager',CreatedDate:today.toISOString()},
+        {BranchID:'BR-004',BranchName:'JBR Branch',Address:'Jumeirah Beach Residence',City:'Dubai',Phone:'+971-4-000-0004',Manager:'Branch Manager',CreatedDate:today.toISOString()},
+        {BranchID:'BR-005',BranchName:'Abu Dhabi Mall',Address:'Abu Dhabi Mall',City:'Abu Dhabi',Phone:'+971-2-000-0001',Manager:'Branch Manager',CreatedDate:today.toISOString()},
+        {BranchID:'BR-006',BranchName:'Sharjah City Centre',Address:'Al Nahda',City:'Sharjah',Phone:'+971-6-000-0001',Manager:'Branch Manager',CreatedDate:today.toISOString()}
+      ],
+      employees: [
+        {EmployeeID:'EMP-0001',EmployeeName:'Ahmed Al Mansoori',BranchID:'BR-001',BranchName:'Head Office - Dubai',Designation:'IT Manager',Email:'ahmed@example.com',Phone:'+971-50-111-2222',Status:'Active',CreatedDate:today.toISOString()},
+        {EmployeeID:'EMP-0002',EmployeeName:'Sara Khan',BranchID:'BR-002',BranchName:'Downtown Branch',Designation:'Branch Manager',Email:'sara@example.com',Phone:'+971-50-333-4444',Status:'Active',CreatedDate:today.toISOString()},
+        {EmployeeID:'EMP-0003',EmployeeName:'Ramesh Patel',BranchID:'BR-005',BranchName:'Abu Dhabi Mall',Designation:'Cashier',Email:'ramesh@example.com',Phone:'+971-50-555-6666',Status:'Active',CreatedDate:today.toISOString()}
+      ],
+      stock: [
+        {ItemID:'ITM-0001',ItemName:'USB-C Charger',Category:'Charger',Unit:'pcs',ReceivedQty:50,IssuedQty:38,AvailableQty:12,MinStock:10,LastUpdated:today.toISOString()},
+        {ItemID:'ITM-0002',ItemName:'HDMI Cable 2m',Category:'Cable',Unit:'pcs',ReceivedQty:30,IssuedQty:28,AvailableQty:2,MinStock:5,LastUpdated:today.toISOString()},
+        {ItemID:'ITM-0003',ItemName:'Wireless Mouse',Category:'Accessory',Unit:'pcs',ReceivedQty:20,IssuedQty:5,AvailableQty:15,MinStock:5,LastUpdated:today.toISOString()},
+        {ItemID:'ITM-0004',ItemName:'USB Keyboard',Category:'Accessory',Unit:'pcs',ReceivedQty:25,IssuedQty:10,AvailableQty:15,MinStock:8,LastUpdated:today.toISOString()},
+        {ItemID:'ITM-0005',ItemName:'Power Adapter',Category:'Adapter',Unit:'pcs',ReceivedQty:15,IssuedQty:14,AvailableQty:1,MinStock:3,LastUpdated:today.toISOString()}
+      ],
+      stockMovements: [
+        {MovementID:'MOV-0001',ItemID:'ITM-0001',ItemName:'USB-C Charger',Type:'Received',Quantity:50,Person:'Ahmed',Date:today.toISOString(),Remarks:'Initial stock'},
+        {MovementID:'MOV-0002',ItemID:'ITM-0001',ItemName:'USB-C Charger',Type:'Issued',Quantity:38,Person:'Multiple',Date:today.toISOString(),Remarks:'Issued to branches'}
+      ],
+      maintenance: [
+        {RequestID:'REP-0001',AssetID:'AST-0004',AssetName:'Epson Thermal Printer',IssueDescription:'Paper feed not working',RequestDate:today.toISOString(),Status:'Pending',RepairCost:0,Vendor:'',ResolutionDate:'',ResolutionNotes:''}
+      ],
+      transfers: [
+        {TransferID:'TRF-0001',AssetID:'AST-0001',AssetName:'Dell Latitude 5520',FromBranchID:'BR-002',FromBranch:'Downtown Branch',ToBranchID:'BR-001',ToBranch:'Head Office - Dubai',Reason:'Reassigned to IT Manager',TransferDate:today.toISOString(),ApprovedBy:'IT Manager'}
+      ],
+      assignments: [
+        {AssignmentID:'ASG-0001',AssetID:'AST-0001',AssetName:'Dell Latitude 5520',EmployeeID:'EMP-0001',EmployeeName:'Ahmed Al Mansoori',BranchID:'BR-001',BranchName:'Head Office - Dubai',IssueDate:today.toISOString(),ReturnDate:'',Status:'Active',Remarks:''}
+      ],
+      users: [
+        {UserID:'USR-0001',Username:'admin',Password:'admin123',FullName:'System Administrator',Role:'admin',Email:'',CreatedDate:today.toISOString(),LastLogin:''}
+      ],
+      activityLog: [
+        {LogID:'LOG-0001',Timestamp:today.toISOString(),Username:'admin',Action:'Login',Details:'User logged in'}
+      ],
+      categories: ['Laptop','Desktop','Monitor','Printer','Router','Switch','Access Point','CCTV Camera','NVR','POS Machine','Tablet','IP Phone','NAS','UPS','Accessory']
+    };
+    return db;
+  },
+  _log(action, details) {
+    const db = this._load();
+    const id = 'LOG-' + ('0000' + (db.activityLog.length + 1)).slice(-4);
+    db.activityLog.unshift({LogID:id, Timestamp:new Date().toISOString(), Username:(State.user && State.user.username) || 'system', Action:action, Details:details});
+    db.activityLog = db.activityLog.slice(0, 200);
+    this._save(db);
+  },
+  login(username, password) {
+    const db = this._load();
+    const u = db.users.find(x => x.Username === username);
+    if (!u) return { success:false, message:'User not found.' };
+    if (String(u.Password) !== String(password)) return { success:false, message:'Incorrect password.' };
+    const token = 'demo-' + Date.now();
+    return { success:true, token:token, user:{ userId:u.UserID, username:u.Username, fullName:u.FullName, role:u.Role, email:u.Email } };
+  },
+  getAllData() {
+    const db = this._load();
+    db.users = db.users.map(u => ({userId:u.UserID, username:u.Username, fullName:u.FullName, role:u.Role, email:u.Email, createdDate:u.CreatedDate, lastLogin:u.LastLogin}));
+    return db;
+  },
+  getDashboardStats() {
+    const db = this._load();
+    const today = new Date();
+    const c = {total:0,assigned:0,available:0,repair:0,damaged:0,warrantyAlert:0};
+    const byBranch = {}, byCategory = {};
+    db.assets.forEach(a => {
+      c.total++;
+      if (a.Status === 'Assigned') c.assigned++;
+      if (a.Status === 'Available') c.available++;
+      if (a.Status === 'Under Repair') c.repair++;
+      if (a.Status === 'Damaged') c.damaged++;
+      if (a.WarrantyExpiry) {
+        const days = Math.floor((new Date(a.WarrantyExpiry) - today) / 86400000);
+        if (days <= 30) c.warrantyAlert++;
+      }
+      const bn = a.BranchName || 'Unassigned';
+      byBranch[bn] = (byBranch[bn]||0)+1;
+      const cat = a.Category || 'Other';
+      byCategory[cat] = (byCategory[cat]||0)+1;
+    });
+    const lowStock = db.stock.filter(s => Number(s.AvailableQty) <= Number(s.MinStock))
+      .map(s => ({itemName:s.ItemName, available:s.AvailableQty, min:s.MinStock}));
+    return { counts:c, byBranch, byCategory, branches:db.branches.length, lowStockItems:lowStock };
+  },
+  _genId(prefix, items, field) {
+    let max = 0;
+    items.forEach(i => { const m = String(i[field]||'').match(/(\d+)$/); if (m) max = Math.max(max, +m[1]); });
+    return prefix + '-' + ('0000' + (max+1)).slice(-4);
+  },
+  addAsset(a) {
+    const db = this._load();
+    const id = this._genId('AST', db.assets, 'AssetID');
+    const branchName = (db.branches.find(b => b.BranchID === a.branchId)||{}).BranchName || '';
+    const empName = (db.employees.find(e => e.EmployeeID === a.employeeId)||{}).EmployeeName || '';
+    const now = new Date().toISOString();
+    db.assets.push({AssetID:id,AssetName:a.assetName,Category:a.category,Brand:a.brand,Model:a.model,SerialNumber:a.serialNumber,PurchaseDate:a.purchaseDate,PurchasePrice:a.purchasePrice,WarrantyExpiry:a.warrantyExpiry,BranchID:a.branchId,BranchName:branchName,EmployeeID:a.employeeId,EmployeeName:empName,Status:a.status||'Available',Remarks:a.remarks||'',CreatedDate:now,UpdatedDate:now});
+    this._save(db); this._log('Add Asset', id+' - '+a.assetName);
+    return {success:true, id};
+  },
+  updateAsset(a) {
+    const db = this._load();
+    const idx = db.assets.findIndex(x => x.AssetID === a.assetId);
+    if (idx === -1) return {success:false, message:'Asset not found'};
+    const branchName = (db.branches.find(b => b.BranchID === a.branchId)||{}).BranchName || '';
+    const empName = (db.employees.find(e => e.EmployeeID === a.employeeId)||{}).EmployeeName || '';
+    Object.assign(db.assets[idx], {AssetName:a.assetName,Category:a.category,Brand:a.brand,Model:a.model,SerialNumber:a.serialNumber,PurchaseDate:a.purchaseDate,PurchasePrice:a.purchasePrice,WarrantyExpiry:a.warrantyExpiry,BranchID:a.branchId,BranchName:branchName,EmployeeID:a.employeeId,EmployeeName:empName,Status:a.status,Remarks:a.remarks,UpdatedDate:new Date().toISOString()});
+    this._save(db); this._log('Update Asset', a.assetId);
+    return {success:true};
+  },
+  deleteAsset(id) {
+    const db = this._load();
+    db.assets = db.assets.filter(x => x.AssetID !== id);
+    this._save(db); this._log('Delete Asset', id);
+    return {success:true};
+  },
+  addBranch(b) {
+    const db = this._load();
+    const id = this._genId('BR', db.branches, 'BranchID');
+    db.branches.push({BranchID:id,BranchName:b.branchName,Address:b.address,City:b.city,Phone:b.phone,Manager:b.manager,CreatedDate:new Date().toISOString()});
+    this._save(db); this._log('Add Branch', b.branchName);
+    return {success:true, id};
+  },
+  updateBranch(b) {
+    const db = this._load();
+    const idx = db.branches.findIndex(x => x.BranchID === b.branchId);
+    if (idx === -1) return {success:false};
+    Object.assign(db.branches[idx], {BranchName:b.branchName,Address:b.address,City:b.city,Phone:b.phone,Manager:b.manager});
+    this._save(db); return {success:true};
+  },
+  deleteBranch(id) {
+    const db = this._load();
+    db.branches = db.branches.filter(x => x.BranchID !== id);
+    this._save(db); return {success:true};
+  },
+  addEmployee(e) {
+    const db = this._load();
+    const id = this._genId('EMP', db.employees, 'EmployeeID');
+    const branchName = (db.branches.find(b => b.BranchID === e.branchId)||{}).BranchName || '';
+    db.employees.push({EmployeeID:id,EmployeeName:e.employeeName,BranchID:e.branchId,BranchName:branchName,Designation:e.designation,Email:e.email,Phone:e.phone,Status:e.status||'Active',CreatedDate:new Date().toISOString()});
+    this._save(db); this._log('Add Employee', e.employeeName);
+    return {success:true, id};
+  },
+  updateEmployee(e) {
+    const db = this._load();
+    const idx = db.employees.findIndex(x => x.EmployeeID === e.employeeId);
+    if (idx === -1) return {success:false};
+    const branchName = (db.branches.find(b => b.BranchID === e.branchId)||{}).BranchName || '';
+    Object.assign(db.employees[idx], {EmployeeName:e.employeeName,BranchID:e.branchId,BranchName:branchName,Designation:e.designation,Email:e.email,Phone:e.phone,Status:e.status});
+    this._save(db); return {success:true};
+  },
+  deleteEmployee(id) {
+    const db = this._load();
+    db.employees = db.employees.filter(x => x.EmployeeID !== id);
+    this._save(db); return {success:true};
+  },
+  assignAsset(data) {
+    const db = this._load();
+    const a = db.assets.find(x => x.AssetID === data.assetId);
+    if (!a) return {success:false, message:'Asset not found'};
+    const emp = db.employees.find(x => x.EmployeeID === data.employeeId);
+    const br = db.branches.find(x => x.BranchID === data.branchId);
+    a.EmployeeID = data.employeeId; a.EmployeeName = emp ? emp.EmployeeName : '';
+    a.BranchID = data.branchId; a.BranchName = br ? br.BranchName : '';
+    a.Status = 'Assigned'; a.UpdatedDate = new Date().toISOString();
+    const id = this._genId('ASG', db.assignments, 'AssignmentID');
+    db.assignments.push({AssignmentID:id,AssetID:data.assetId,AssetName:a.AssetName,EmployeeID:data.employeeId,EmployeeName:emp?emp.EmployeeName:'',BranchID:data.branchId,BranchName:br?br.BranchName:'',IssueDate:data.issueDate||new Date().toISOString(),ReturnDate:'',Status:'Active',Remarks:data.remarks||''});
+    this._save(db); this._log('Assign Asset', data.assetId+' -> '+(emp?emp.EmployeeName:''));
+    return {success:true, id};
+  },
+  returnAsset(data) {
+    const db = this._load();
+    const asg = db.assignments.find(x => x.AssetID === data.assetId && x.Status === 'Active');
+    if (asg) { asg.ReturnDate = data.returnDate || new Date().toISOString(); asg.Status = 'Returned'; if (data.remarks) asg.Remarks = data.remarks; }
+    const a = db.assets.find(x => x.AssetID === data.assetId);
+    if (a) { a.Status = 'Available'; a.EmployeeID = ''; a.EmployeeName = ''; a.UpdatedDate = new Date().toISOString(); }
+    this._save(db); this._log('Return Asset', data.assetId);
+    return {success:true};
+  },
+  transferAsset(data) {
+    const db = this._load();
+    const a = db.assets.find(x => x.AssetID === data.assetId);
+    if (!a) return {success:false, message:'Asset not found'};
+    const fromB = a.BranchName, fromId = a.BranchID;
+    const toBr = db.branches.find(b => b.BranchID === data.toBranchId);
+    a.BranchID = data.toBranchId; a.BranchName = toBr ? toBr.BranchName : '';
+    a.UpdatedDate = new Date().toISOString();
+    const id = this._genId('TRF', db.transfers, 'TransferID');
+    db.transfers.push({TransferID:id,AssetID:data.assetId,AssetName:a.AssetName,FromBranchID:fromId,FromBranch:fromB,ToBranchID:data.toBranchId,ToBranch:toBr?toBr.BranchName:'',Reason:data.reason||'',TransferDate:data.transferDate||new Date().toISOString(),ApprovedBy:data.approvedBy||''});
+    this._save(db); this._log('Transfer Asset', data.assetId+' from '+fromB+' to '+(toBr?toBr.BranchName:''));
+    return {success:true, id};
+  },
+  addStockItem(s) {
+    const db = this._load();
+    const id = this._genId('ITM', db.stock, 'ItemID');
+    db.stock.push({ItemID:id,ItemName:s.itemName,Category:s.category,Unit:s.unit||'pcs',ReceivedQty:0,IssuedQty:0,AvailableQty:0,MinStock:s.minStock||5,LastUpdated:new Date().toISOString()});
+    this._save(db); this._log('Add Stock Item', s.itemName);
+    return {success:true, id};
+  },
+  updateStockItem(s) {
+    const db = this._load();
+    const idx = db.stock.findIndex(x => x.ItemID === s.itemId);
+    if (idx === -1) return {success:false};
+    Object.assign(db.stock[idx], {ItemName:s.itemName,Category:s.category,Unit:s.unit,MinStock:s.minStock});
+    this._save(db); return {success:true};
+  },
+  deleteStockItem(id) {
+    const db = this._load();
+    db.stock = db.stock.filter(x => x.ItemID !== id);
+    this._save(db); return {success:true};
+  },
+  recordStockMovement(m) {
+    const db = this._load();
+    const it = db.stock.find(x => x.ItemID === m.itemId);
+    if (!it) return {success:false, message:'Item not found'};
+    const qty = Number(m.quantity) || 0;
+    if (m.type === 'Received') { it.ReceivedQty = Number(it.ReceivedQty)+qty; it.AvailableQty = Number(it.AvailableQty)+qty; }
+    else { if (qty > Number(it.AvailableQty)) return {success:false, message:'Not enough stock. Available: '+it.AvailableQty}; it.IssuedQty = Number(it.IssuedQty)+qty; it.AvailableQty = Number(it.AvailableQty)-qty; }
+    it.LastUpdated = new Date().toISOString();
+    const id = this._genId('MOV', db.stockMovements, 'MovementID');
+    db.stockMovements.unshift({MovementID:id,ItemID:m.itemId,ItemName:it.ItemName,Type:m.type,Quantity:qty,Person:m.person,Date:m.date||new Date().toISOString(),Remarks:m.remarks||''});
+    this._save(db); this._log('Stock '+m.type, it.ItemName+' x'+qty);
+    return {success:true, id, available:it.AvailableQty};
+  },
+  addMaintenance(r) {
+    const db = this._load();
+    const id = this._genId('REP', db.maintenance, 'RequestID');
+    const a = db.assets.find(x => x.AssetID === r.assetId);
+    db.maintenance.unshift({RequestID:id,AssetID:r.assetId,AssetName:a?a.AssetName:'',IssueDescription:r.issueDescription,RequestDate:r.requestDate||new Date().toISOString(),Status:r.status||'Pending',RepairCost:r.repairCost||0,Vendor:r.vendor||'',ResolutionDate:'',ResolutionNotes:''});
+    if (r.updateAssetStatus && a) { a.Status = (r.status==='Resolved'?'Available':'Under Repair'); a.UpdatedDate = new Date().toISOString(); }
+    this._save(db); this._log('Add Repair Request', id+' - '+(a?a.AssetName:''));
+    return {success:true, id};
+  },
+  updateMaintenance(r) {
+    const db = this._load();
+    const m = db.maintenance.find(x => x.RequestID === r.requestId);
+    if (!m) return {success:false};
+    Object.assign(m, {IssueDescription:r.issueDescription,Status:r.status,RepairCost:r.repairCost||0,Vendor:r.vendor});
+    if (r.status === 'Resolved' || r.status === 'Closed') { m.ResolutionDate = r.resolutionDate || new Date().toISOString(); m.ResolutionNotes = r.resolutionNotes; }
+    this._save(db); return {success:true};
+  },
+  deleteMaintenance(id) {
+    const db = this._load();
+    db.maintenance = db.maintenance.filter(x => x.RequestID !== id);
+    this._save(db); return {success:true};
+  },
+  addUser(d) {
+    const db = this._load();
+    if (db.users.find(u => u.Username === d.username)) return {success:false, message:'Username already exists'};
+    const id = this._genId('USR', db.users, 'UserID');
+    db.users.push({UserID:id,Username:d.username,Password:d.password,FullName:d.fullName,Role:d.role||'staff',Email:d.email||'',CreatedDate:new Date().toISOString(),LastLogin:''});
+    this._save(db); this._log('Add User', d.username);
+    return {success:true, id};
+  },
+  updateUser(d) {
+    const db = this._load();
+    const u = db.users.find(x => x.Username === d.username);
+    if (!u) return {success:false};
+    u.Password = d.password; u.FullName = d.fullName; u.Role = d.role; u.Email = d.email;
+    this._save(db); return {success:true};
+  },
+  deleteUser(username) {
+    const db = this._load();
+    if (username === 'admin') return {success:false, message:'Cannot delete the primary admin'};
+    db.users = db.users.filter(u => u.Username !== username);
+    this._save(db); return {success:true};
+  },
+  saveCategories(list) {
+    const db = this._load();
+    db.categories = list;
+    this._save(db); return {success:true};
+  },
+  setupDatabase() { return {success:true, message:'Demo database is ready (stored in your browser).'}; },
+  getSpreadsheetUrl() { return {url:'#demo-mode', id:'local-storage'}; }
+};
+
+/* ---------- UTILITIES ---------- */
+function $(id) { return document.getElementById(id); }
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmtDate(d) {
+  if (!d) return '';
+  if (typeof d === 'object' && d.getMonth) return d.toISOString().slice(0,10);
+  if (typeof d === 'string' && d.length > 10) return d.slice(0,10);
+  return String(d);
+}
+function fmtDateTime(d) {
+  if (!d) return '';
+  let s = (typeof d === 'object' && d.getMonth) ? d.toISOString() : String(d);
+  return s.replace('T',' ').slice(0,16);
+}
+function statusBadge(s) {
+  const map = { 'Available':'available','Assigned':'assigned','Under Repair':'repair','Damaged':'damaged',
+                'Active':'active','Returned':'returned','Pending':'pending','Resolved':'resolved','Closed':'closed' };
+  const cls = map[s] || 'pending';
+  return '<span class="badge badge-'+cls+'">'+escapeHtml(s||'-')+'</span>';
+}
+function showToast(msg, type) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'success');
+  t.classList.remove('hidden');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+function confirmDialog(title, message, onYes) {
+  $('confirmTitle').textContent = title;
+  $('confirmMessage').textContent = message;
+  $('confirmOverlay').classList.remove('hidden');
+  window._confirmCb = onYes;
+}
+function closeConfirm(ok) {
+  $('confirmOverlay').classList.add('hidden');
+  if (ok && window._confirmCb) window._confirmCb();
+  window._confirmCb = null;
+}
+
+function safeRender(fn, fallbackMsg) {
+  try { fn(); }
+  catch (e) {
+    console.error('Render error:', e);
+    if (fallbackMsg) showToast(fallbackMsg + ': ' + e.message, 'error');
+  }
+}
+
+/* ---------- LOGIN ---------- */
+async function doLogin(e) {
+  e.preventDefault();
+  const u = $('loginUser').value.trim();
+  const p = $('loginPass').value;
+  $('loginMsg').textContent = '';
+  try {
+    const r = await API.call('login', u, p);
+    if (r.success) {
+      State.user = r.user;
+      if (r.token) {
+        State.token = r.token;
+        localStorage.setItem('it_asset_token', r.token);
+      }
+      localStorage.setItem('it_asset_user', JSON.stringify(r.user));
+      $('loginScreen').classList.add('hidden');
+      $('appMain').classList.remove('hidden');
+      $('currentUserLabel').textContent = (r.user.fullName || r.user.username) + ' (' + r.user.role + ')';
+      await initApp();
+      showPage('dashboard', document.querySelector('.nav-link[data-page="dashboard"]'));
+    } else {
+      $('loginMsg').textContent = r.message || 'Login failed';
+    }
+  } catch (err) {
+    $('loginMsg').textContent = 'Error: ' + err.message;
+  }
+  return false;
+}
+
+function logout() {
+  State.user = null;
+  State.token = null;
+  localStorage.removeItem('it_asset_user');
+  localStorage.removeItem('it_asset_token');
+  $('appMain').classList.add('hidden');
+  $('loginScreen').classList.remove('hidden');
+  $('loginForm').reset();
+}
+
+/* ---------- APP INIT ---------- */
+async function initApp() {
+  const isAdmin = State.user && State.user.role === 'admin';
+  $('navUsers').style.display = isAdmin ? '' : 'none';
+  $('navActivity').style.display = isAdmin ? '' : 'none';
+
+  try {
+    await refreshAllData();
+  } catch (e) {
+    showToast('Could not load data: ' + e.message, 'error');
+    console.error(e);
+  }
+  populateFilterDropdowns();
+}
+
+async function refreshAllData() {
+  if (IS_DEMO) {
+    const r = Demo.getAllData();
+    State.data = Object.assign(State.data, r);
+    if (!State.data.categories || !State.data.categories.length) {
+      State.data.categories = ['Laptop','Desktop','Monitor','Printer','Router','Switch','Access Point','CCTV Camera','NVR','POS Machine','Tablet','IP Phone','NAS','UPS','Accessory'];
+    }
+    return;
+  }
+  // Embedded or Hosted - call backend
+  const r = await API.call('getAllData');
+  if (!r) throw new Error('Empty response from server');
+  State.data.assets = r.assets || [];
+  State.data.branches = r.branches || [];
+  State.data.employees = r.employees || [];
+  State.data.stock = r.stock || [];
+  State.data.stockMovements = r.stockMovements || [];
+  State.data.maintenance = r.maintenance || [];
+  State.data.transfers = r.transfers || [];
+  State.data.assignments = r.assignments || [];
+  State.data.users = r.users || [];
+  State.data.activityLog = r.activityLog || [];
+  try {
+    State.data.categories = await API.call('getCategories') || [];
+  } catch (e) {
+    State.data.categories = ['Laptop','Desktop','Monitor','Printer','Router','Switch','Access Point','CCTV Camera','NVR','POS Machine','Tablet','IP Phone','NAS','UPS','Accessory'];
+  }
+}
+
+/* ---------- NAVIGATION ---------- */
+function showPage(page, link) {
+  State.currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = $('page-' + page);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  if (link) link.classList.add('active'); else {
+    const nl = document.querySelector('.nav-link[data-page="'+page+'"]');
+    if (nl) nl.classList.add('active');
+  }
+  const titles = {
+    dashboard:'Dashboard', assets:'Asset Register', branches:'Branches',
+    employees:'Employees', assignments:'Asset Assignments', transfers:'Asset Transfers',
+    stock:'IT Stock Management', maintenance:'Maintenance & Warranty',
+    reports:'Reports', users:'Users', activity:'Activity Log', settings:'Settings'
+  };
+  $('pageTitle').textContent = titles[page] || 'Page';
+
+  // Render page content with error handling
+  safeRender(() => {
+    switch (page) {
+      case 'dashboard': renderDashboard(); break;
+      case 'assets': renderAssets(); break;
+      case 'branches': renderBranches(); break;
+      case 'employees': renderEmployees(); break;
+      case 'assignments': renderAssignments(); break;
+      case 'transfers': renderTransfers(); break;
+      case 'stock': renderStock(); renderMovements(); break;
+      case 'maintenance': renderMaintenance(); renderWarrantyAlerts(); break;
+      case 'users': renderUsers(); break;
+      case 'activity': renderActivity(); break;
+      case 'settings': loadSettings(); break;
+    }
+  }, 'Could not render ' + page);
+
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) $('sidebar').classList.remove('mobile-open');
+}
+
+function toggleSidebar() {
+  const sb = $('sidebar');
+  if (window.innerWidth <= 768) {
+    sb.classList.toggle('mobile-open');
+  } else {
+    sb.classList.toggle('collapsed');
+  }
+}
+
+/* ---------- DASHBOARD ---------- */
+async function renderDashboard() {
+  let stats;
+  if (IS_DEMO) stats = Demo.getDashboardStats();
+  else stats = await API.call('getDashboardStats');
+
+  const c = stats.counts || {total:0,assigned:0,available:0,repair:0,damaged:0,warrantyAlert:0};
+  const cards = [
+    {label:'Total IT Assets', value:c.total, cls:''},
+    {label:'Assigned', value:c.assigned, cls:''},
+    {label:'Available Stock', value:c.available, cls:'green'},
+    {label:'Under Repair', value:c.repair, cls:'orange'},
+    {label:'Damaged Assets', value:c.damaged, cls:'red'},
+    {label:'Warranty Alerts', value:c.warrantyAlert, cls:'yellow'}
+  ];
+  $('statGrid').innerHTML = cards.map(card =>
+    '<div class="stat-card '+card.cls+'"><div class="stat-label">'+card.label+'</div><div class="stat-value">'+card.value+'</div></div>'
+  ).join('');
+
+  if (stats.lowStockItems && stats.lowStockItems.length) {
+    $('lowStockList').innerHTML = stats.lowStockItems.map(s =>
+      '<div class="low-stock-item"><div><div class="name">'+escapeHtml(s.itemName)+'</div><div class="info">Available: '+s.available+' / Min: '+s.min+'</div></div><span class="badge badge-low">LOW</span></div>'
+    ).join('');
+  } else {
+    $('lowStockList').innerHTML = '<p style="color:#64748b;padding:10px 0">All stock levels are healthy.</p>';
+  }
+  renderCharts(stats.byBranch || {}, stats.byCategory || {});
+}
+
+function renderCharts(byBranch, byCategory) {
+  const branchCanvas = $('branchChart');
+  const catCanvas = $('categoryChart');
+  if (!branchCanvas || !catCanvas) return;
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded');
+    return;
+  }
+  if (State.charts.branch) State.charts.branch.destroy();
+  if (State.charts.category) State.charts.category.destroy();
+
+  const bLabels = Object.keys(byBranch);
+  const bData = bLabels.map(k => byBranch[k]);
+  State.charts.branch = new Chart(branchCanvas, {
+    type: 'bar',
+    data: { labels: bLabels, datasets: [{ label:'Assets', data:bData, backgroundColor:'#2563eb', borderRadius:4 }]},
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      resizeDelay: 200,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      layout: { padding: { top: 5, bottom: 5 } }
+    }
+  });
+
+  const cLabels = Object.keys(byCategory);
+  const cData = cLabels.map(k => byCategory[k]);
+  const palette = ['#2563eb','#16a34a','#ea580c','#dc2626','#ca8a04','#7c3aed','#0891b2','#db2777','#65a30d','#4f46e5','#0d9488','#b45309','#9333ea','#0284c7','#dc2626'];
+  State.charts.category = new Chart(catCanvas, {
+    type: 'doughnut',
+    data: { labels:cLabels, datasets:[{data:cData, backgroundColor:palette, borderWidth:2, borderColor:'#fff'}]},
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      resizeDelay: 200,
+      plugins: { legend: { position:'right', labels:{ boxWidth:12, padding:8, font:{ size:11 } } } }
+    }
+  });
+}
+
+/* ---------- ASSETS ---------- */
+function populateFilterDropdowns() {
+  const cats = State.data.categories || [];
+  const brs = State.data.branches || [];
+  const fillSel = (sel, items, val, txt) => {
+    if (!sel) return;
+    sel.innerHTML = '<option value="">All</option>' + items.map(i => '<option value="'+escapeHtml(i[val])+'">'+escapeHtml(i[txt])+'</option>').join('');
+  };
+  fillSel($('assetFilterCategory'), cats.map(c => ({v:c, t:c})), 'v', 't');
+  fillSel($('assetFilterBranch'), brs, 'BranchID', 'BranchName');
+  fillSel($('empFilterBranch'), brs, 'BranchID', 'BranchName');
+}
+
+function getFilteredAssets() {
+  const searchEl = $('assetSearch');
+  const q = (searchEl ? searchEl.value : '').toLowerCase();
+  const catEl = $('assetFilterCategory');
+  const cat = catEl ? catEl.value : '';
+  const brEl = $('assetFilterBranch');
+  const br = brEl ? brEl.value : '';
+  const stEl = $('assetFilterStatus');
+  const st = stEl ? stEl.value : '';
+  return State.data.assets.filter(a => {
+    if (cat && a.Category !== cat) return false;
+    if (br && a.BranchID !== br) return false;
+    if (st && a.Status !== st) return false;
+    if (q) {
+      const blob = [a.AssetID, a.AssetName, a.Brand, a.Model, a.SerialNumber, a.EmployeeName, a.BranchName, a.Category].join(' ').toLowerCase();
+      if (!blob.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderAssets() {
+  const list = getFilteredAssets();
+  const tbl = $('assetTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr>'+
+    '<th>Asset ID</th><th>Name</th><th>Category</th><th>Brand / Model</th>'+
+    '<th>Serial</th><th>Branch</th><th>Assigned To</th><th>Status</th>'+
+    '<th>Warranty</th><th>Actions</th></tr>';
+
+  const pageSize = State.pagination.pageSize;
+  const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
+  if (State.pagination.assets > totalPages) State.pagination.assets = 1;
+  const start = (State.pagination.assets - 1) * pageSize;
+  const pageItems = list.slice(start, start + pageSize);
+
+  if (!pageItems.length) {
+    tbl.querySelector('tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;color:#64748b;padding:24px">No assets found. Click "+ Add Asset" to add your first asset.</td></tr>';
+  } else {
+    tbl.querySelector('tbody').innerHTML = pageItems.map(a => {
+      const today = new Date();
+      let wClass = '';
+      if (a.WarrantyExpiry) {
+        const days = Math.floor((new Date(a.WarrantyExpiry) - today) / 86400000);
+        if (days < 0) wClass = ' style="color:#dc2626;font-weight:600"';
+        else if (days <= 30) wClass = ' style="color:#ea580c;font-weight:600"';
+      }
+      return '<tr>'+
+        '<td><strong>'+escapeHtml(a.AssetID)+'</strong></td>'+
+        '<td>'+escapeHtml(a.AssetName)+'</td>'+
+        '<td>'+escapeHtml(a.Category)+'</td>'+
+        '<td>'+escapeHtml(a.Brand)+' '+escapeHtml(a.Model)+'</td>'+
+        '<td>'+escapeHtml(a.SerialNumber)+'</td>'+
+        '<td>'+escapeHtml(a.BranchName)+'</td>'+
+        '<td>'+escapeHtml(a.EmployeeName || '-')+'</td>'+
+        '<td>'+statusBadge(a.Status)+'</td>'+
+        '<td'+wClass+'>'+fmtDate(a.WarrantyExpiry)+'</td>'+
+        '<td>'+
+          '<button class="btn btn-sm btn-info" onclick="viewAsset(\''+a.AssetID+'\')">View</button> '+
+          '<button class="btn btn-sm btn-secondary" onclick="openAssetForm(\''+a.AssetID+'\')">Edit</button> '+
+          '<button class="btn btn-sm btn-danger" onclick="deleteAssetConfirm(\''+a.AssetID+'\')">Del</button>'+
+        '</td></tr>';
+    }).join('');
+  }
+  $('assetPagination').innerHTML =
+    '<span class="page-info">'+list.length+' record(s)</span>'+
+    '<button '+(State.pagination.assets<=1?'disabled':'')+' onclick="goToPage('+(State.pagination.assets-1)+')">&laquo; Prev</button>'+
+    '<button class="active">'+State.pagination.assets+' / '+totalPages+'</button>'+
+    '<button '+(State.pagination.assets>=totalPages?'disabled':'')+' onclick="goToPage('+(State.pagination.assets+1)+')">Next &raquo;</button>';
+}
+function goToPage(n) { State.pagination.assets = n; renderAssets(); }
+
+function openAssetForm(id) {
+  const a = id ? State.data.assets.find(x => x.AssetID === id) : null;
+  const branches = State.data.branches || [];
+  const employees = State.data.employees || [];
+  const cats = State.data.categories || [];
+  $('modalTitle').textContent = a ? 'Edit Asset' : 'Add New Asset';
+  $('modalBody').innerHTML =
+    '<form id="assetForm">'+
+      '<div class="form-row">'+
+        '<div class="form-group"><label>Asset Name *</label><input name="assetName" required value="'+escapeHtml(a?a.AssetName:'')+'"></div>'+
+        '<div class="form-group"><label>Category *</label><select name="category" required>'+cats.map(c => '<option '+(a&&a.Category===c?'selected':'')+'>'+escapeHtml(c)+'</option>').join('')+'</select></div>'+
+      '</div>'+
+      '<div class="form-row">'+
+        '<div class="form-group"><label>Brand</label><input name="brand" value="'+escapeHtml(a?a.Brand:'')+'"></div>'+
+        '<div class="form-group"><label>Model</label><input name="model" value="'+escapeHtml(a?a.Model:'')+'"></div>'+
+      '</div>'+
+      '<div class="form-row">'+
+        '<div class="form-group"><label>Serial Number</label><input name="serialNumber" value="'+escapeHtml(a?a.SerialNumber:'')+'"></div>'+
+        '<div class="form-group"><label>Status</label><select name="status">'+
+          ['Available','Assigned','Under Repair','Damaged'].map(s => '<option '+(a&&a.Status===s?'selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+      '</div>'+
+      '<div class="form-row">'+
+        '<div class="form-group"><label>Purchase Date</label><input type="date" name="purchaseDate" value="'+fmtDate(a?a.PurchaseDate:'')+'"></div>'+
+        '<div class="form-group"><label>Purchase Price</label><input type="number" step="0.01" name="purchasePrice" value="'+escapeHtml(a?a.PurchasePrice:'')+'"></div>'+
+      '</div>'+
+      '<div class="form-group"><label>Warranty Expiry</label><input type="date" name="warrantyExpiry" value="'+fmtDate(a?a.WarrantyExpiry:'')+'"></div>'+
+      '<div class="form-row">'+
+        '<div class="form-group"><label>Branch</label><select name="branchId"><option value="">- None -</option>'+branches.map(b => '<option value="'+b.BranchID+'" '+(a&&a.BranchID===b.BranchID?'selected':'')+'>'+escapeHtml(b.BranchName)+'</option>').join('')+'</select></div>'+
+        '<div class="form-group"><label>Assigned Employee</label><select name="employeeId"><option value="">- None -</option>'+employees.map(e => '<option value="'+e.EmployeeID+'" '+(a&&a.EmployeeID===e.EmployeeID?'selected':'')+'>'+escapeHtml(e.EmployeeName)+'</option>').join('')+'</select></div>'+
+      '</div>'+
+      '<div class="form-group"><label>Remarks</label><textarea name="remarks" rows="2">'+escapeHtml(a?a.Remarks:'')+'</textarea></div>'+
+      '<div class="form-actions">'+
+        '<button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>'+
+        '<button type="submit" class="btn btn-primary">'+(a?'Update':'Add Asset')+'</button>'+
+      '</div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('assetForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {};
+    fd.forEach((v, k) => payload[k] = v);
+    if (a) payload.assetId = a.AssetID;
+    const fn = a ? 'updateAsset' : 'addAsset';
+    const r = await API.call(fn, payload);
+    if (r.success) { showToast(a?'Asset updated':'Asset added', 'success'); closeModal(); await refreshAllData(); renderAssets(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function viewAsset(id) {
+  const a = State.data.assets.find(x => x.AssetID === id);
+  if (!a) return;
+  $('modalTitle').textContent = 'Asset Details - ' + a.AssetID;
+  const rows = [
+    ['Asset ID', a.AssetID], ['Asset Name', a.AssetName], ['Category', a.Category],
+    ['Brand', a.Brand], ['Model', a.Model], ['Serial Number', a.SerialNumber],
+    ['Status', a.Status], ['Purchase Date', fmtDate(a.PurchaseDate)],
+    ['Purchase Price', a.PurchasePrice], ['Warranty Expiry', fmtDate(a.WarrantyExpiry)],
+    ['Branch', a.BranchName], ['Assigned Employee', a.EmployeeName || '-'],
+    ['Remarks', a.Remarks || '-'], ['Created', fmtDateTime(a.CreatedDate)],
+    ['Last Updated', fmtDateTime(a.UpdatedDate)]
+  ];
+  $('modalBody').innerHTML =
+    '<table class="data-table"><tbody>'+rows.map(r =>
+      '<tr><td style="font-weight:600;width:40%">'+escapeHtml(r[0])+'</td><td>'+escapeHtml(r[1])+'</td></tr>'
+    ).join('')+'</tbody></table>'+
+    '<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">Close</button></div>';
+  $('modalOverlay').classList.remove('hidden');
+}
+
+function deleteAssetConfirm(id) {
+  confirmDialog('Delete Asset', 'Delete asset '+id+'? This cannot be undone.', async () => {
+    const r = await API.call('deleteAsset', id);
+    if (r.success) { showToast('Asset deleted', 'success'); await refreshAllData(); renderAssets(); }
+    else showToast(r.message || 'Failed', 'error');
+  });
+}
+
+/* ---------- BRANCHES ---------- */
+function renderBranches() {
+  const q = (($('branchSearch')||{}).value || '').toLowerCase();
+  const list = State.data.branches.filter(b => {
+    if (!q) return true;
+    return [b.BranchID, b.BranchName, b.City, b.Manager].join(' ').toLowerCase().includes(q);
+  });
+  const tbl = $('branchTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Branch ID</th><th>Name</th><th>Address</th><th>City</th><th>Phone</th><th>Manager</th><th>Assets</th><th>Actions</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px">No branches.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(b => {
+    const count = State.data.assets.filter(a => a.BranchID === b.BranchID).length;
+    return '<tr><td><strong>'+escapeHtml(b.BranchID)+'</strong></td><td>'+escapeHtml(b.BranchName)+'</td><td>'+escapeHtml(b.Address)+'</td><td>'+escapeHtml(b.City)+'</td><td>'+escapeHtml(b.Phone)+'</td><td>'+escapeHtml(b.Manager)+'</td><td>'+count+'</td><td><button class="btn btn-sm btn-secondary" onclick="openBranchForm(\''+b.BranchID+'\')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteBranchConfirm(\''+b.BranchID+'\')">Del</button></td></tr>';
+  }).join('');
+}
+
+function openBranchForm(id) {
+  const b = id ? State.data.branches.find(x => x.BranchID === id) : null;
+  $('modalTitle').textContent = b ? 'Edit Branch' : 'Add Branch';
+  $('modalBody').innerHTML =
+    '<form id="branchForm">'+
+      '<div class="form-group"><label>Branch Name *</label><input name="branchName" required value="'+escapeHtml(b?b.BranchName:'')+'"></div>'+
+      '<div class="form-group"><label>Address</label><input name="address" value="'+escapeHtml(b?b.Address:'')+'"></div>'+
+      '<div class="form-row"><div class="form-group"><label>City</label><input name="city" value="'+escapeHtml(b?b.City:'')+'"></div>'+
+      '<div class="form-group"><label>Phone</label><input name="phone" value="'+escapeHtml(b?b.Phone:'')+'"></div></div>'+
+      '<div class="form-group"><label>Manager</label><input name="manager" value="'+escapeHtml(b?b.Manager:'')+'"></div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">'+(b?'Update':'Add Branch')+'</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('branchForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    if (b) payload.branchId = b.BranchID;
+    const r = await API.call(b?'updateBranch':'addBranch', payload);
+    if (r.success) { showToast(b?'Branch updated':'Branch added','success'); closeModal(); await refreshAllData(); populateFilterDropdowns(); renderBranches(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function deleteBranchConfirm(id) {
+  confirmDialog('Delete Branch', 'Delete branch '+id+'?', async () => {
+    const r = await API.call('deleteBranch', id);
+    if (r.success) { showToast('Branch deleted','success'); await refreshAllData(); populateFilterDropdowns(); renderBranches(); }
+    else showToast(r.message || 'Failed', 'error');
+  });
+}
+
+/* ---------- EMPLOYEES ---------- */
+function renderEmployees() {
+  const q = (($('empSearch')||{}).value || '').toLowerCase();
+  const br = $('empFilterBranch') ? $('empFilterBranch').value : '';
+  const list = State.data.employees.filter(e => {
+    if (br && e.BranchID !== br) return false;
+    if (!q) return true;
+    return [e.EmployeeID, e.EmployeeName, e.Designation, e.Email, e.Phone].join(' ').toLowerCase().includes(q);
+  });
+  const tbl = $('employeeTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Emp ID</th><th>Name</th><th>Branch</th><th>Designation</th><th>Email</th><th>Phone</th><th>Status</th><th>Assets</th><th>Actions</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">No employees.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(e => {
+    const cnt = State.data.assets.filter(a => a.EmployeeID === e.EmployeeID).length;
+    return '<tr><td><strong>'+escapeHtml(e.EmployeeID)+'</strong></td><td>'+escapeHtml(e.EmployeeName)+'</td><td>'+escapeHtml(e.BranchName)+'</td><td>'+escapeHtml(e.Designation)+'</td><td>'+escapeHtml(e.Email)+'</td><td>'+escapeHtml(e.Phone)+'</td><td>'+statusBadge(e.Status)+'</td><td>'+cnt+'</td><td><button class="btn btn-sm btn-secondary" onclick="openEmployeeForm(\''+e.EmployeeID+'\')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteEmployeeConfirm(\''+e.EmployeeID+'\')">Del</button></td></tr>';
+  }).join('');
+}
+
+function openEmployeeForm(id) {
+  const e = id ? State.data.employees.find(x => x.EmployeeID === id) : null;
+  const branches = State.data.branches || [];
+  $('modalTitle').textContent = e ? 'Edit Employee' : 'Add Employee';
+  $('modalBody').innerHTML =
+    '<form id="empForm">'+
+      '<div class="form-group"><label>Employee Name *</label><input name="employeeName" required value="'+escapeHtml(e?e.EmployeeName:'')+'"></div>'+
+      '<div class="form-row"><div class="form-group"><label>Branch</label><select name="branchId"><option value="">- None -</option>'+branches.map(b => '<option value="'+b.BranchID+'" '+(e&&e.BranchID===b.BranchID?'selected':'')+'>'+escapeHtml(b.BranchName)+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Designation</label><input name="designation" value="'+escapeHtml(e?e.Designation:'')+'"></div></div>'+
+      '<div class="form-row"><div class="form-group"><label>Email</label><input name="email" type="email" value="'+escapeHtml(e?e.Email:'')+'"></div>'+
+      '<div class="form-group"><label>Phone</label><input name="phone" value="'+escapeHtml(e?e.Phone:'')+'"></div></div>'+
+      '<div class="form-group"><label>Status</label><select name="status">'+['Active','Inactive'].map(s => '<option '+(e&&e.Status===s?'selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">'+(e?'Update':'Add Employee')+'</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('empForm').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(ev.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    if (e) payload.employeeId = e.EmployeeID;
+    const r = await API.call(e?'updateEmployee':'addEmployee', payload);
+    if (r.success) { showToast(e?'Employee updated':'Employee added','success'); closeModal(); await refreshAllData(); renderEmployees(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function deleteEmployeeConfirm(id) {
+  confirmDialog('Delete Employee', 'Delete employee '+id+'?', async () => {
+    const r = await API.call('deleteEmployee', id);
+    if (r.success) { showToast('Employee deleted','success'); await refreshAllData(); renderEmployees(); }
+    else showToast(r.message || 'Failed', 'error');
+  });
+}
+
+/* ---------- ASSIGNMENTS ---------- */
+function renderAssignments() {
+  const list = State.data.assignments || [];
+  const tbl = $('assignmentTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Assignment ID</th><th>Asset</th><th>Employee</th><th>Branch</th><th>Issue Date</th><th>Return Date</th><th>Status</th><th>Remarks</th><th>Actions</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">No assignments yet.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(a =>
+    '<tr><td><strong>'+escapeHtml(a.AssignmentID)+'</strong></td><td>'+escapeHtml(a.AssetName)+'<br><small>'+escapeHtml(a.AssetID)+'</small></td><td>'+escapeHtml(a.EmployeeName)+'</td><td>'+escapeHtml(a.BranchName)+'</td><td>'+fmtDate(a.IssueDate)+'</td><td>'+fmtDate(a.ReturnDate)+'</td><td>'+statusBadge(a.Status)+'</td><td>'+escapeHtml(a.Remarks||'-')+'</td>'+
+    '<td>'+(a.Status==='Active'?'<button class="btn btn-sm btn-warning" onclick="openReturnForm(\''+a.AssetID+'\')">Return</button>':'')+'</td></tr>'
+  ).join('');
+}
+
+function openAssignForm() {
+  const assets = (State.data.assets||[]).filter(a => a.Status !== 'Damaged');
+  const employees = State.data.employees || [];
+  const branches = State.data.branches || [];
+  if (!assets.length || !employees.length) { showToast('Add at least one asset and one employee first', 'warning'); return; }
+  $('modalTitle').textContent = 'Assign Asset';
+  $('modalBody').innerHTML =
+    '<form id="assignForm">'+
+      '<div class="form-group"><label>Asset *</label><select name="assetId" required>'+assets.map(a => '<option value="'+a.AssetID+'">'+escapeHtml(a.AssetID+' - '+a.AssetName+' ('+a.Status+')')+'</option>').join('')+'</select></div>'+
+      '<div class="form-row"><div class="form-group"><label>Employee *</label><select name="employeeId" required>'+employees.map(e => '<option value="'+e.EmployeeID+'">'+escapeHtml(e.EmployeeName+' ('+e.BranchName+')')+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Branch</label><select name="branchId">'+branches.map(b => '<option value="'+b.BranchID+'">'+escapeHtml(b.BranchName)+'</option>').join('')+'</select></div></div>'+
+      '<div class="form-group"><label>Issue Date</label><input type="date" name="issueDate" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+      '<div class="form-group"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Assign Asset</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('assignForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    const r = await API.call('assignAsset', payload);
+    if (r.success) { showToast('Asset assigned','success'); closeModal(); await refreshAllData(); renderAssignments(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function openReturnForm(assetId) {
+  $('modalTitle').textContent = 'Return Asset';
+  $('modalBody').innerHTML =
+    '<form id="returnForm">'+
+      '<p>Return asset <strong>'+escapeHtml(assetId)+'</strong>?</p>'+
+      '<div class="form-group"><label>Return Date</label><input type="date" name="returnDate" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+      '<div class="form-group"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-warning">Return Asset</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('returnForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {assetId}; fd.forEach((v, k) => payload[k] = v);
+    const r = await API.call('returnAsset', payload);
+    if (r.success) { showToast('Asset returned','success'); closeModal(); await refreshAllData(); renderAssignments(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+/* ---------- TRANSFERS ---------- */
+function renderTransfers() {
+  const list = State.data.transfers || [];
+  const tbl = $('transferTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Transfer ID</th><th>Asset</th><th>From Branch</th><th>To Branch</th><th>Reason</th><th>Date</th><th>Approved By</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px">No transfers yet.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(t =>
+    '<tr><td><strong>'+escapeHtml(t.TransferID)+'</strong></td><td>'+escapeHtml(t.AssetName)+'<br><small>'+escapeHtml(t.AssetID)+'</small></td><td>'+escapeHtml(t.FromBranch)+'</td><td>'+escapeHtml(t.ToBranch)+'</td><td>'+escapeHtml(t.Reason||'-')+'</td><td>'+fmtDate(t.TransferDate)+'</td><td>'+escapeHtml(t.ApprovedBy||'-')+'</td></tr>'
+  ).join('');
+}
+
+function openTransferForm() {
+  const assets = State.data.assets || [];
+  const branches = State.data.branches || [];
+  if (!assets.length) { showToast('Add at least one asset first', 'warning'); return; }
+  $('modalTitle').textContent = 'Transfer Asset';
+  $('modalBody').innerHTML =
+    '<form id="transferForm">'+
+      '<div class="form-group"><label>Asset *</label><select name="assetId" required>'+assets.map(a => '<option value="'+a.AssetID+'">'+escapeHtml(a.AssetID+' - '+a.AssetName+' (currently at '+a.BranchName+')')+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Transfer To Branch *</label><select name="toBranchId" required>'+branches.map(b => '<option value="'+b.BranchID+'">'+escapeHtml(b.BranchName)+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Reason</label><input name="reason" placeholder="e.g., Reassignment, branch closing"></div>'+
+      '<div class="form-row"><div class="form-group"><label>Transfer Date</label><input type="date" name="transferDate" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+      '<div class="form-group"><label>Approved By</label><input name="approvedBy" value="'+escapeHtml(State.user?State.user.fullName:'')+'"></div></div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Transfer Asset</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('transferForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    const r = await API.call('transferAsset', payload);
+    if (r.success) { showToast('Asset transferred','success'); closeModal(); await refreshAllData(); renderTransfers(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+/* ---------- STOCK ---------- */
+function renderStock() {
+  const q = (($('stockSearch')||{}).value || '').toLowerCase();
+  const list = State.data.stock.filter(s => {
+    if (!q) return true;
+    return [s.ItemID, s.ItemName, s.Category].join(' ').toLowerCase().includes(q);
+  });
+  const tbl = $('stockTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Item ID</th><th>Item Name</th><th>Category</th><th>Unit</th><th>Received</th><th>Issued</th><th>Available</th><th>Min Stock</th><th>Status</th><th>Actions</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;color:#64748b;padding:24px">No stock items.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(s => {
+    const low = Number(s.AvailableQty) <= Number(s.MinStock);
+    return '<tr><td><strong>'+escapeHtml(s.ItemID)+'</strong></td><td>'+escapeHtml(s.ItemName)+'</td><td>'+escapeHtml(s.Category)+'</td><td>'+escapeHtml(s.Unit)+'</td><td>'+s.ReceivedQty+'</td><td>'+s.IssuedQty+'</td><td>'+(low?'<strong style="color:#dc2626">':'')+s.AvailableQty+(low?'</strong>':'')+'</td><td>'+s.MinStock+'</td><td>'+(low?'<span class="badge badge-low">LOW</span>':'<span class="badge badge-available">OK</span>')+'</td><td><button class="btn btn-sm btn-secondary" onclick="openStockForm(\''+s.ItemID+'\')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteStockConfirm(\''+s.ItemID+'\')">Del</button></td></tr>';
+  }).join('');
+}
+
+function renderMovements() {
+  const list = State.data.stockMovements || [];
+  const tbl = $('movementTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Movement ID</th><th>Item</th><th>Type</th><th>Quantity</th><th>Person</th><th>Date</th><th>Remarks</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px">No movements recorded.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(m =>
+    '<tr><td><strong>'+escapeHtml(m.MovementID)+'</strong></td><td>'+escapeHtml(m.ItemName)+'</td><td>'+(m.Type==='Received'?'<span class="badge badge-available">Received</span>':'<span class="badge badge-repair">Issued</span>')+'</td><td>'+m.Quantity+'</td><td>'+escapeHtml(m.Person)+'</td><td>'+fmtDateTime(m.Date)+'</td><td>'+escapeHtml(m.Remarks||'-')+'</td></tr>'
+  ).join('');
+}
+
+function openStockForm(id) {
+  const s = id ? State.data.stock.find(x => x.ItemID === id) : null;
+  $('modalTitle').textContent = s ? 'Edit Stock Item' : 'Add Stock Item';
+  $('modalBody').innerHTML =
+    '<form id="stockForm">'+
+      '<div class="form-group"><label>Item Name *</label><input name="itemName" required value="'+escapeHtml(s?s.ItemName:'')+'"></div>'+
+      '<div class="form-row"><div class="form-group"><label>Category</label><input name="category" value="'+escapeHtml(s?s.Category:'')+'" placeholder="Charger, Cable, Adapter..."></div>'+
+      '<div class="form-group"><label>Unit</label><input name="unit" value="'+escapeHtml(s?s.Unit:'pcs')+'"></div></div>'+
+      '<div class="form-group"><label>Minimum Stock Level</label><input type="number" name="minStock" value="'+escapeHtml(s?s.MinStock:5)+'"></div>'+
+      (s?'<p style="color:#64748b;font-size:12px">Use Receive/Issue buttons to change quantities.</p>':'')+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">'+(s?'Update':'Add Item')+'</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('stockForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    if (s) payload.itemId = s.ItemID;
+    const r = await API.call(s?'updateStockItem':'addStockItem', payload);
+    if (r.success) { showToast(s?'Item updated':'Item added','success'); closeModal(); await refreshAllData(); renderStock(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function openMovementForm(type) {
+  const items = State.data.stock || [];
+  if (!items.length) { showToast('Add a stock item first', 'warning'); return; }
+  $('modalTitle').textContent = type === 'Received' ? 'Receive Stock' : 'Issue Stock';
+  $('modalBody').innerHTML =
+    '<form id="movementForm">'+
+      '<div class="form-group"><label>Item *</label><select name="itemId" required>'+items.map(i => '<option value="'+i.ItemID+'">'+escapeHtml(i.ItemName)+' (Available: '+i.AvailableQty+')</option>').join('')+'</select></div>'+
+      '<div class="form-row"><div class="form-group"><label>Quantity *</label><input type="number" name="quantity" required min="1" value="1"></div>'+
+      '<div class="form-group"><label>Date</label><input type="date" name="date" value="'+new Date().toISOString().slice(0,10)+'"></div></div>'+
+      '<div class="form-group"><label>'+(type==='Received'?'Received By':'Issued To')+' *</label><input name="person" required></div>'+
+      '<div class="form-group"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>'+
+      '<input type="hidden" name="type" value="'+type+'">'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn '+(type==='Received'?'btn-info':'btn-warning')+'">'+type+' Stock</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('movementForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    const r = await API.call('recordStockMovement', payload);
+    if (r.success) { showToast(type+' recorded','success'); closeModal(); await refreshAllData(); renderStock(); renderMovements(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function deleteStockConfirm(id) {
+  confirmDialog('Delete Stock Item', 'Delete stock item '+id+'?', async () => {
+    const r = await API.call('deleteStockItem', id);
+    if (r.success) { showToast('Item deleted','success'); await refreshAllData(); renderStock(); }
+    else showToast(r.message || 'Failed', 'error');
+  });
+}
+
+/* ---------- MAINTENANCE ---------- */
+function renderMaintenance() {
+  const list = State.data.maintenance || [];
+  const tbl = $('maintenanceTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Request ID</th><th>Asset</th><th>Issue</th><th>Request Date</th><th>Status</th><th>Cost</th><th>Vendor</th><th>Resolved</th><th>Actions</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">No repair requests.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(m =>
+    '<tr><td><strong>'+escapeHtml(m.RequestID)+'</strong></td><td>'+escapeHtml(m.AssetName)+'<br><small>'+escapeHtml(m.AssetID)+'</small></td><td>'+escapeHtml(m.IssueDescription)+'</td><td>'+fmtDate(m.RequestDate)+'</td><td>'+statusBadge(m.Status)+'</td><td>'+(m.RepairCost||0)+'</td><td>'+escapeHtml(m.Vendor||'-')+'</td><td>'+fmtDate(m.ResolutionDate)+'</td><td><button class="btn btn-sm btn-secondary" onclick="openMaintenanceForm(\''+m.RequestID+'\')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteMaintenanceConfirm(\''+m.RequestID+'\')">Del</button></td></tr>'
+  ).join('');
+}
+
+function renderWarrantyAlerts() {
+  const today = new Date();
+  const list = (State.data.assets || []).filter(a => {
+    if (!a.WarrantyExpiry) return false;
+    const days = Math.floor((new Date(a.WarrantyExpiry) - today) / 86400000);
+    return days <= 30;
+  });
+  const tbl = $('warrantyTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Asset ID</th><th>Asset Name</th><th>Branch</th><th>Warranty Expiry</th><th>Days Left</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:18px">No warranty alerts in the next 30 days.</td></tr>'; return; }
+  list.sort((a, b) => new Date(a.WarrantyExpiry) - new Date(b.WarrantyExpiry));
+  tbl.querySelector('tbody').innerHTML = list.map(a => {
+    const days = Math.floor((new Date(a.WarrantyExpiry) - today) / 86400000);
+    const cls = days < 0 ? 'badge-damaged' : 'badge-repair';
+    return '<tr><td><strong>'+escapeHtml(a.AssetID)+'</strong></td><td>'+escapeHtml(a.AssetName)+'</td><td>'+escapeHtml(a.BranchName)+'</td><td>'+fmtDate(a.WarrantyExpiry)+'</td><td><span class="badge '+cls+'">'+(days<0?('Expired '+Math.abs(days)+'d ago'):days+' days left')+'</span></td></tr>';
+  }).join('');
+}
+
+function openMaintenanceForm(id) {
+  const m = id ? State.data.maintenance.find(x => x.RequestID === id) : null;
+  const assets = State.data.assets || [];
+  if (!assets.length) { showToast('Add at least one asset first', 'warning'); return; }
+  $('modalTitle').textContent = m ? 'Edit Repair Request' : 'New Repair Request';
+  $('modalBody').innerHTML =
+    '<form id="maintForm">'+
+      '<div class="form-group"><label>Asset *</label><select name="assetId" required '+(m?'disabled':'')+'>'+assets.map(a => '<option value="'+a.AssetID+'" '+(m&&m.AssetID===a.AssetID?'selected':'')+'>'+escapeHtml(a.AssetID+' - '+a.AssetName)+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Issue Description *</label><textarea name="issueDescription" rows="3" required>'+escapeHtml(m?m.IssueDescription:'')+'</textarea></div>'+
+      '<div class="form-row"><div class="form-group"><label>Request Date</label><input type="date" name="requestDate" value="'+(m?fmtDate(m.RequestDate):new Date().toISOString().slice(0,10))+'"></div>'+
+      '<div class="form-group"><label>Status</label><select name="status">'+['Pending','In Progress','Resolved','Closed'].map(s => '<option '+(m&&m.Status===s?'selected':'')+'>'+s+'</option>').join('')+'</select></div></div>'+
+      '<div class="form-row"><div class="form-group"><label>Repair Cost</label><input type="number" step="0.01" name="repairCost" value="'+escapeHtml(m?m.RepairCost:0)+'"></div>'+
+      '<div class="form-group"><label>Vendor</label><input name="vendor" value="'+escapeHtml(m?m.Vendor:'')+'"></div></div>'+
+      '<div class="form-group"><label>Resolution Notes</label><textarea name="resolutionNotes" rows="2">'+escapeHtml(m?m.ResolutionNotes:'')+'</textarea></div>'+
+      (!m?'<div class="form-group"><label><input type="checkbox" name="updateAssetStatus" checked> Also update asset status to Under Repair</label></div>':'')+
+      '<input type="hidden" name="requestId" value="'+(m?m.RequestID:'')+'">'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">'+(m?'Update':'Submit')+' Request</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('maintForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    if (m) payload.requestId = m.RequestID;
+    const r = await API.call(m?'updateMaintenance':'addMaintenance', payload);
+    if (r.success) { showToast(m?'Updated':'Repair request added','success'); closeModal(); await refreshAllData(); renderMaintenance(); renderWarrantyAlerts(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function deleteMaintenanceConfirm(id) {
+  confirmDialog('Delete Repair Record', 'Delete repair record '+id+'?', async () => {
+    const r = await API.call('deleteMaintenance', id);
+    if (r.success) { showToast('Record deleted','success'); await refreshAllData(); renderMaintenance(); }
+    else showToast(r.message || 'Failed', 'error');
+  });
+}
+
+/* ---------- USERS ---------- */
+function renderUsers() {
+  const list = State.data.users || [];
+  const tbl = $('userTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>User ID</th><th>Username</th><th>Full Name</th><th>Role</th><th>Email</th><th>Last Login</th><th>Actions</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px">No users.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(u =>
+    '<tr><td><strong>'+escapeHtml(u.userId)+'</strong></td><td>'+escapeHtml(u.username)+'</td><td>'+escapeHtml(u.fullName)+'</td><td>'+(u.role==='admin'?'<span class="badge badge-assigned">Admin</span>':'<span class="badge badge-available">IT Staff</span>')+'</td><td>'+escapeHtml(u.email||'-')+'</td><td>'+fmtDateTime(u.lastLogin)+'</td><td>'+(u.username!=='admin'?'<button class="btn btn-sm btn-secondary" onclick="openUserForm(\''+u.username+'\')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteUserConfirm(\''+u.username+'\')">Del</button>':'<button class="btn btn-sm btn-secondary" onclick="openUserForm(\''+u.username+'\')">Edit</button>')+'</td></tr>'
+  ).join('');
+}
+
+function openUserForm(username) {
+  const u = username ? State.data.users.find(x => x.username === username) : null;
+  $('modalTitle').textContent = u ? 'Edit User' : 'Add User';
+  $('modalBody').innerHTML =
+    '<form id="userForm">'+
+      '<div class="form-group"><label>Username *</label><input name="username" required value="'+escapeHtml(u?u.username:'')+'" '+(u?'disabled':'')+'></div>'+
+      '<div class="form-group"><label>Password *</label><input name="password" required value="'+escapeHtml(u?u.password:'')+'"></div>'+
+      '<div class="form-group"><label>Full Name *</label><input name="fullName" required value="'+escapeHtml(u?u.fullName:'')+'"></div>'+
+      '<div class="form-row"><div class="form-group"><label>Role</label><select name="role">'+['admin','staff'].map(r => '<option value="'+r+'" '+(u&&u.role===r?'selected':'')+'>'+(r==='admin'?'Admin':'IT Staff')+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Email</label><input name="email" type="email" value="'+escapeHtml(u?u.email:'')+'"></div></div>'+
+      '<div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">'+(u?'Update':'Add User')+'</button></div>'+
+    '</form>';
+  $('modalOverlay').classList.remove('hidden');
+  $('userForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = {}; fd.forEach((v, k) => payload[k] = v);
+    if (u) payload.username = u.username;
+    const r = await API.call(u?'updateUser':'addUser', payload);
+    if (r.success) { showToast(u?'User updated':'User added','success'); closeModal(); await refreshAllData(); renderUsers(); }
+    else showToast(r.message || 'Failed', 'error');
+  };
+}
+
+function deleteUserConfirm(username) {
+  confirmDialog('Delete User', 'Delete user '+username+'?', async () => {
+    const r = await API.call('deleteUser', username);
+    if (r.success) { showToast('User deleted','success'); await refreshAllData(); renderUsers(); }
+    else showToast(r.message || 'Failed', 'error');
+  });
+}
+
+/* ---------- ACTIVITY LOG ---------- */
+function renderActivity() {
+  const list = State.data.activityLog || [];
+  const tbl = $('activityTable');
+  if (!tbl) return;
+  tbl.querySelector('thead').innerHTML = '<tr><th>Log ID</th><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr>';
+  if (!list.length) { tbl.querySelector('tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:24px">No activity logged.</td></tr>'; return; }
+  tbl.querySelector('tbody').innerHTML = list.map(l =>
+    '<tr><td><strong>'+escapeHtml(l.LogID)+'</strong></td><td>'+fmtDateTime(l.Timestamp)+'</td><td>'+escapeHtml(l.Username)+'</td><td>'+escapeHtml(l.Action)+'</td><td>'+escapeHtml(l.Details)+'</td></tr>'
+  ).join('');
+}
+
+/* ---------- SETTINGS ---------- */
+function loadSettings() {
+  const ci = $('categoriesInput'); if (ci) ci.value = (State.data.categories || []).join(', ');
+  loadDbInfo();
+}
+
+async function loadDbInfo() {
+  const dbInfoEl = $('dbInfo'); if (!dbInfoEl) return;
+  if (IS_EMBEDDED) {
+    try {
+      const r = await API.call('getSpreadsheetUrl');
+      dbInfoEl.innerHTML = 'Spreadsheet ID: <code>'+escapeHtml(r.id)+'</code><br>URL: <a href="'+escapeHtml(r.url)+'" target="_blank">'+escapeHtml(r.url)+'</a><br><br>Mode: <strong>Embedded (served from Apps Script)</strong>';
+    } catch (e) { dbInfoEl.textContent = 'Error: ' + e.message; }
+  } else if (IS_HOSTED) {
+    dbInfoEl.innerHTML = 'Mode: <strong>Hosted (calling Apps Script JSON API)</strong><br>Backend URL: <code>'+escapeHtml(BACKEND_URL)+'</code>';
+  } else {
+    dbInfoEl.innerHTML = 'Mode: <strong>Demo Mode</strong> (data is stored in your browser localStorage).<br>To deploy for real, follow the SETUP_GUIDE.md file.';
+  }
+}
+
+async function saveCategories() {
+  const ci = $('categoriesInput');
+  if (!ci) return;
+  const list = ci.value.split(',').map(s => s.trim()).filter(Boolean);
+  const r = await API.call('saveCategories', list);
+  if (r.success) { State.data.categories = list; populateFilterDropdowns(); showToast('Categories saved','success'); }
+  else showToast(r.message || 'Failed', 'error');
+}
+
+/* ---------- CSV EXPORT ---------- */
+function exportCSV(type) {
+  let data, filename, headers;
+  switch (type) {
+    case 'assets': data = State.data.assets; filename = 'asset_register.csv'; headers = ['AssetID','AssetName','Category','Brand','Model','SerialNumber','PurchaseDate','PurchasePrice','WarrantyExpiry','BranchName','EmployeeName','Status','Remarks']; break;
+    case 'branches': data = State.data.branches; filename = 'branches.csv'; headers = ['BranchID','BranchName','Address','City','Phone','Manager']; break;
+    case 'employees': data = State.data.employees; filename = 'employees.csv'; headers = ['EmployeeID','EmployeeName','BranchName','Designation','Email','Phone','Status']; break;
+    case 'stock': data = State.data.stock; filename = 'stock.csv'; headers = ['ItemID','ItemName','Category','Unit','ReceivedQty','IssuedQty','AvailableQty','MinStock']; break;
+    case 'stockMovements': data = State.data.stockMovements; filename = 'stock_movements.csv'; headers = ['MovementID','ItemName','Type','Quantity','Person','Date','Remarks']; break;
+    case 'maintenance': data = State.data.maintenance; filename = 'maintenance.csv'; headers = ['RequestID','AssetID','AssetName','IssueDescription','RequestDate','Status','RepairCost','Vendor','ResolutionDate','ResolutionNotes']; break;
+    case 'transfers': data = State.data.transfers; filename = 'transfers.csv'; headers = ['TransferID','AssetID','AssetName','FromBranch','ToBranch','Reason','TransferDate','ApprovedBy']; break;
+    case 'assignments': data = State.data.assignments; filename = 'assignments.csv'; headers = ['AssignmentID','AssetID','AssetName','EmployeeName','BranchName','IssueDate','ReturnDate','Status','Remarks']; break;
+    default: return;
+  }
+  if (!data || !data.length) { showToast('No data to export', 'warning'); return; }
+  const rows = [headers.join(',')];
+  data.forEach(item => {
+    rows.push(headers.map(h => {
+      let v = item[h] === null || item[h] === undefined ? '' : item[h];
+      v = String(v).replace(/"/g, '""');
+      if (/[",\n]/.test(v)) v = '"'+v+'"';
+      return v;
+    }).join(','));
+  });
+  downloadCSV(filename, rows.join('\n'));
+}
+
+function exportBranchAssets() {
+  const grouped = {};
+  State.data.assets.forEach(a => {
+    const b = a.BranchName || 'Unassigned';
+    if (!grouped[b]) grouped[b] = [];
+    grouped[b].push(a);
+  });
+  const rows = ['Branch,AssetID,AssetName,Category,Status,EmployeeName'];
+  for (let b in grouped) {
+    grouped[b].forEach(a => {
+      rows.push([b, a.AssetID, a.AssetName, a.Category, a.Status, a.EmployeeName||''].map(v => '"'+String(v).replace(/"/g,'""')+'"').join(','));
+    });
+  }
+  downloadCSV('branch_wise_assets.csv', rows.join('\n'));
+}
+
+function exportEmployeeAssets() {
+  const rows = ['EmployeeID,EmployeeName,Branch,AssetID,AssetName,Category,Status'];
+  State.data.assets.filter(a => a.EmployeeID).forEach(a => {
+    rows.push([a.EmployeeID, a.EmployeeName, a.BranchName, a.AssetID, a.AssetName, a.Category, a.Status].map(v => '"'+String(v).replace(/"/g,'""')+'"').join(','));
+  });
+  downloadCSV('employee_wise_assets.csv', rows.join('\n'));
+}
+
+function downloadCSV(filename, content) {
+  const blob = new Blob(['\ufeff'+content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = filename;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  showToast('Exported '+filename, 'success');
+}
+
+/* ---------- MODAL ---------- */
+function closeModal() { $('modalOverlay').classList.add('hidden'); }
+
+/* ---------- PAGE LOAD ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  // Restore session
+  const savedUser = localStorage.getItem('it_asset_user');
+  const savedToken = localStorage.getItem('it_asset_token');
+  if (savedUser) {
+    try {
+      const u = JSON.parse(savedUser);
+      State.user = u;
+      if (savedToken) State.token = savedToken;
+      $('loginScreen').classList.add('hidden');
+      $('appMain').classList.remove('hidden');
+      $('currentUserLabel').textContent = (u.fullName || u.username) + ' (' + u.role + ')';
+      initApp().then(() => {
+        showPage('dashboard', document.querySelector('.nav-link[data-page="dashboard"]'));
+      }).catch(e => {
+        console.error('Init error:', e);
+        showToast('Init failed: ' + e.message, 'error');
+      });
+    } catch (e) {
+      localStorage.removeItem('it_asset_user');
+      localStorage.removeItem('it_asset_token');
+    }
+  }
+  // Show demo-mode hint
+  if (IS_DEMO) {
+    setTimeout(() => {
+      if (!State.user) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#1e3a8a;color:#fff;padding:8px 14px;border-radius:6px;font-size:12px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+        hint.innerHTML = 'DEMO MODE - Sign in with <strong>admin / admin123</strong> to preview. Data is stored in your browser.';
+        document.querySelector('.login-screen').appendChild(hint);
+      }
+    }, 500);
+  } else if (IS_HOSTED) {
+    setTimeout(() => {
+      if (!State.user) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#16a34a;color:#fff;padding:8px 14px;border-radius:6px;font-size:12px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+        hint.innerHTML = 'Connected to backend. Sign in with <strong>admin / admin123</strong>.';
+        document.querySelector('.login-screen').appendChild(hint);
+      }
+    }, 500);
+  }
+});
+
+// Global error handler
+window.addEventListener('error', (e) => {
+  console.error('Unhandled error:', e.error || e.message);
+});
+</script>
+
+</body>
+</html>
