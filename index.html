@@ -499,7 +499,7 @@ body {
       <div class="login-hint">
         <strong>Default credentials</strong><br>
         Username: <code>admin</code><br>
-        Password: <code></code><br>
+        Password: <code>admin123</code><br>
         <em>Please change the password after first login.</em>
       </div>
     </div>
@@ -2181,7 +2181,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!State.user) {
         const hint = document.createElement('div');
         hint.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#1e3a8a;color:#fff;padding:8px 14px;border-radius:6px;font-size:12px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-        hint.innerHTML = 'DEMO MODE - Sign in with <strong></strong> to preview. Data is stored in your browser.';
+        hint.innerHTML = 'DEMO MODE - Sign in with <strong>admin / admin123</strong> to preview. Data is stored in your browser.';
         document.querySelector('.login-screen').appendChild(hint);
       }
     }, 500);
@@ -2190,7 +2190,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!State.user) {
         const hint = document.createElement('div');
         hint.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#16a34a;color:#fff;padding:8px 14px;border-radius:6px;font-size:12px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-        hint.innerHTML = 'Connected to backend. Sign in with <strong></strong>.';
+        hint.innerHTML = 'Connected to backend. Sign in with <strong>admin / admin123</strong>.';
         document.querySelector('.login-screen').appendChild(hint);
       }
     }, 500);
