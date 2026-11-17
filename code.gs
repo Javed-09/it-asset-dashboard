@@ -26,7 +26,7 @@ const CONFIG = {
   COMPANY_NAME: 'RestaurantCo IT',
   CURRENCY: 'AED',
   // Default admin created on first run
-  DEFAULT_ADMIN: {
+ // DEFAULT_ADMIN: {
     username: 'admin',
     password: 'admin123',   // CHANGE after first login
     fullName: 'System Administrator',
